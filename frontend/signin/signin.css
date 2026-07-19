@@ -1,0 +1,134 @@
+body {
+    background: #f5f7fa; /* light modern background */
+    color: #1a6726;     /* clean dark text */
+    margin: 0;
+}
+
+/* Subtle fresh glow */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(circle at center,
+            rgba(17, 153, 142, 0.15),
+            rgba(56, 239, 125, 0.15),
+            transparent);
+  filter: blur(60px);
+  z-index: -1;
+}
+
+#main-div {
+    display: flex;
+    padding: 20px;
+    margin: 10px;
+    margin-left: 50px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 40px;
+}
+
+#header {
+    background: linear-gradient(135deg, #11998e, #38ef7d); /* teal to green */
+    color:#fff;
+    border: none;
+    padding: 20px;
+    font-size: 1.9rem;
+    font-weight: bold;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(17, 153, 142, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25%;
+    height: 70vh;
+    margin-top: 40px;
+}
+#form{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width:  50%;
+    font-weight: bold;
+    padding: 10px;
+    margin: 10px;
+
+}
+.form-label{
+    margin: 5px;
+}
+
+
+.form-control {
+    padding: 13px;
+    border:1px solid #bbb; /* softer neutral border */
+    border-radius: 5px;
+    width: 100%;
+    background: #fff;       /* clean white inputs */
+    color: #1a1a1a;
+    margin-top: 5px;
+}
+.form-control:focus {
+    border-color: #38ef7d;  /* green glow on focus */
+    box-shadow: 0 0 6px rgba(56, 239, 125, 0.6);
+    outline: none;
+}
+
+#submit {
+  background: linear-gradient(135deg, #38ef7d, #11998e); /* fresh gradient */
+  color: #fff;
+  border: none;
+  padding:15px 20px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 10px;
+  width: 220px;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(17, 153, 142, 0.4);
+  transition: all 0.3s ease;
+}
+
+#submit:hover {
+  background: linear-gradient(135deg, #11998e, #38ef7d);
+  box-shadow: 0 0 12px rgba(56, 239, 125, 0.6);
+  transform: scale(1.03);
+}
+
+@media (max-width: 600px) {
+  #main-div {
+    flex-direction: column;   /* stack header and form vertically */
+    align-items: center;
+    justify-content: center;
+    margin-left: 0;           /* remove left offset */
+    gap: 20px;
+  }
+
+  #header {
+    width: 90%;               /* header fills most of screen */
+    height: auto;             /* let height adjust naturally */
+    margin-top: 20px;
+    font-size: 1.4rem;        /* slightly smaller text */
+    padding: 15px;
+  }
+
+  #form {
+    width: 95%;               /* form fills screen width */
+    margin: 0;
+    padding: 15px;
+  }
+
+  .form-control {
+    width: 100%;              /* inputs full width */
+    font-size: 0.95rem;
+  }
+
+  #submit {
+    width: 100%;              /* button full width */
+    max-width: 300px;         /* cap size */
+    font-size: 0.95rem;
+    padding: 12px 15px;
+  }
+}
+
