@@ -18,7 +18,7 @@ async function signup(e) {
             alert('password do not match')
             return
         }
-        if(account){
+        if(account.name && account.email && account.phone && account.password){
             await postUser(account)
         }
         form.reset()
@@ -33,11 +33,10 @@ async function postUser(account) {
         let result = await axios.post(baseURL,account)
         console.log(result.data)
         alert(`${result.data.name} has successfully created an account`)
-        window.location.href="../html/signin.html"
+        window.location.href="../signin/signin.html"
     }
     catch(err){
         console.log(err.message)
-        alert('try again signup failed')
+        alert('try again signup failed or already have an account with this mail ID')
     }
-
 }

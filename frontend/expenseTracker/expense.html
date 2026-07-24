@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../expenseTracker/expense.css">
+
+</head>
+
+<body>
+
+    <header id="main-header">
+        <div class="header-left">
+            <h1>Track Your Expenses</h1>
+        </div>
+        <div class="header-right">
+            <button type="button" id="premiumBtn"><i class="fa-solid fa-crown"></i> Subscribe</button>
+        </div>
+    </header>
+
+    <div class="main-wrapper">
+        <div class="left-panel">
+            <nav class="tab-bar">
+                <button class="tab-btn active" data-tab="expenses">Expense Details</button>
+                <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
+                <button class="tab-btn" data-tab="graphs">Graphs</button>
+            </nav>
+
+            <main id="tab-content">
+                <section id="expenses" class="tab-section active">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expense-table">
+
+                        </tbody>
+                    </table>
+                </section>
+                <section id="leaderboard" class="tab-section">
+                    <h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>
+                </section>
+                <section id="graphs" class="tab-section">
+                    <h3><i class="fa-solid fa-crown"></i> Graphs</h3>
+                </section>
+            </main>
+        </div>
+
+        <div class="right-column">
+            <div class="stats-container">
+                <div class="stat-top">
+                    Budget: <span id="budget"></span>
+                </div>
+                <div class="stat-bottom">
+                    <div>Expenses: <span id="expense"></span></div>
+                    <div>Balance: <span id="balance"></span></div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+
+                <div class="header-switcher" style="display: flex; margin: 0; padding: 0;">
+                    <button id="expenseHeader" class="active-header" onclick="showSection('expense')"
+                        style="flex: 1; padding: 10px; cursor: pointer; border: 1px solid #11998e; background: #11998e; color: white; font-weight: bold; border-radius: 8px 0 0 8px;">
+                        Add Expense
+                    </button>
+                    <button id="budgetHeader" onclick="showSection('budget')"
+                        style="flex: 1; padding: 10px; cursor: pointer; border: 1px solid #ccc; background: white; color: #636e72; font-weight: bold; border-radius: 0 8px 8px 0;">
+                        Add Budget
+                    </button>
+                </div>
+                <form id="form">
+                    <label for="amount">Amount</label>
+                    <input type="number" class="form-control" id="price" required>
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" required></textarea>
+                    <label for="category">Category</label>
+                    <select class="form-control" id="category" required>
+                        <option value="select">Select</option>
+                        <option value="food">Food</option>
+                        <option value="travel">Travel</option>
+                        <option value="salary">Salary</option>
+                        <option value="petrol">Petrol</option>
+                    </select>
+                    <button type="submit" id="submit" class="form-control">Add Expense</button>
+                </form>
+
+                <!-- The New Budget Form -->
+                <form id="budgetForm" style="display:none;">
+                    <label for="budgetInput" style="margin: 5px;">Budget-Amount:</label>
+                    <input type="number" class="form-control" id="budgetInput" required>
+                    <button type="button" id="saveBudgetBtn" class="form-control">Save Budget</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="../expenseTracker/tabsSlides.js"></script>
+    <script src="../expenseTracker/expense.js"></script>
+    <script src="../expenseTracker/toggleform.js"></script>
+
+    <script src="../expenseTracker/payment.js" defer></script>
+
+</body>
+
+</html>

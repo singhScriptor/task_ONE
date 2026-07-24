@@ -27,7 +27,7 @@ async function navigateAccount(account) {
         console.log(result.data)
         alert(`welcome ${result.data.name} `)
 
-        window.location.href = "'../"
+        window.location.href = "../expenseTracker/expense.html"
     }
     catch(err){
         alert('login failed create account first')
