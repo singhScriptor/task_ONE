@@ -12,7 +12,7 @@ exports.signupUser = async(req,res,next)=>{
         res.status(200).json(result)
     }
     catch(err){
-        err.statusCode = 500
+        err.statusCode = err.statusCode || 500
         next(err)
     }
 }
