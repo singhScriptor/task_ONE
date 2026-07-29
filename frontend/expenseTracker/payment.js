@@ -78,8 +78,10 @@ async function verifyAndUpdateStatus() {
         // Fetch user status directly from server DB
         const res = await axios.get(STATUS_URL, { withCredentials: true });
         if (res.data?.isPremiumUser === true) {
-            document.getElementById("premiumBtn").style.display = "inline-block"; // added for handling refresh glitch
             window.updatePremiumUI();
+        }
+        else{
+            if (premiumBtn) premiumBtn.style.display = "inline-block";
         }
     } catch (err) {
         console.error("Verification/Status error:", err);
@@ -91,15 +93,13 @@ window.showLeaderboard = async function () {
     const leaderboardSection = document.getElementById("leaderboard");
     if (!leaderboardSection) return;
 
-    // Clear existing content to prevent duplicate error text
-    leaderboardSection.innerHTML = `<h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>`;
-
     try {
         const response = await axios.get(LEADERBOARD_URL, { withCredentials: true });
         const data = response.data;
 
         if (Array.isArray(data) && data.length > 0) {
-            data.sort((a, b) => (b.total_expenses || 0) - (a.total_expenses || 0));
+            // Clear existing content only for premium users
+            leaderboardSection.innerHTML = `<h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>`;
 
             const table = document.createElement("table");
             table.id = "leaderboardTable";
@@ -122,27 +122,17 @@ window.showLeaderboard = async function () {
 
             leaderboardSection.appendChild(table);
         } else {
+            // Premium but no data
+            leaderboardSection.innerHTML = `<h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>`;
             const emptyMsg = document.createElement("p");
             emptyMsg.textContent = "No leaderboard data available.";
             leaderboardSection.appendChild(emptyMsg);
         }
     }
     catch (err) {
-        // remove default placeholders if premium data was supposed to load
-        document.getElementById("leaderboard-default")?.remove();
-
-        const graph = document.getElementById("graphs-default");
-        if (graph) {
-            graph.remove();   // remove once, don’t append again
-        }
-
         console.error("Leaderboard error:", err);
-        const leaderboardSection = document.getElementById("leaderboard");
-        const errorMsg = document.createElement("p");
-        errorMsg.style.color = "red";
-        errorMsg.textContent = "Something went wrong while loading leaderboard.";
-        leaderboardSection.appendChild(errorMsg);
+        // Do NOT clear section here → leave default <p> intact
     }
-
 };
+
 
