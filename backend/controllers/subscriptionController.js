@@ -8,7 +8,7 @@ const initiatePayment = async (req, res, next) => {
         const loggedInUser = req.user;
 
         // Default to fixed amount (e.g. 1000) if not sent in request body
-        const orderAmount = amount && amount > 0 ? amount : 1000;
+        const orderAmount = amount && amount > 0 ? amount : 1200;
         const orderId = `ord_${Date.now()}_u${loggedInUser.id}`;
 
         const sessionId = await purchaseService.createOrder(orderId, orderAmount, loggedInUser);
@@ -34,27 +34,24 @@ const verifyPayment = async (req, res, next) => {
             return res.status(400).json({ message: 'Order ID is required' });
         }
 
-        // Call latest verify/status method from subscriptionServices
         const result = await purchaseService.verifyOrder(orderId, userId);
 
         if (result.status === 'SUCCESS' || result.status === 'SUCCESSFUL') {
             return res.status(200).json({
-                message: result.message || "Transaction successful! You are now a premium user.",
-                status: "SUCCESSFUL",
-                order_id: orderId
+                message: "Transaction successful!",
+                isPremiumUser: true,
+                status: "SUCCESSFUL"
             });
         }
 
         return res.status(400).json({
-            message: result.message || "Transaction failed.",
-            status: "FAILED",
-            order_id: orderId
+            message: "Transaction failed.",
+            isPremiumUser: false
         });
 
     } catch (err) {
         console.error('--- CASHFREE VERIFICATION ERROR ---', err.response?.data || err.message);
-        err.statusCode = err.statusCode || 500;
-        next(err);
+        return res.status(500).json({ isPremiumUser: false, error: err.message });
     }
 };
 

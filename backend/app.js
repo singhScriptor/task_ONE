@@ -23,7 +23,8 @@ const signupRoutes = require('./routes/signupRoutes')
 const signinRoutes = require('./routes/signinRoutes')
 const expenseRoutes = require('./routes/expensesRoutes')
 const budgetRoutes = require('./routes/budgetRoutes')
-const subscriptionRoute=require('./routes/subscriptionRoutes')
+const subscriptionRoutes = require('./routes/subscriptionRoutes')
+const premiumRoute=require('./routes/premiumRoutes')
 
 //middleware
 const authenticate = require('./middleware/authenticate')
@@ -36,7 +37,8 @@ app.use('/users',signupRoutes)
 app.use('/users',signinRoutes)
 app.use('/api/expenses',expenseRoutes)
 app.use('/api/budget',budgetRoutes)
-app.use('/api/premium',subscriptionRoute)
+app.use('/api/premium',subscriptionRoutes)
+app.use('/api/premium',premiumRoute)
 
 //accessing frontend folder
 app.use(express.static(path.join(__dirname,'../frontend')))

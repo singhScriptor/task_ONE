@@ -1,21 +1,30 @@
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const { user } = require('../models/index');
 
-const authenticate  = async(req,res, next)=>{
-    try{
-        const token = req.cookies.token
+const authenticate = async (req, res, next) => {
+    try {
+        const token = req.cookies.token;
 
-        if(!token){
-            return res.status(401).json({error:'Token missing'})
+        if (!token) {
+            return res.status(401).json({ error: 'Token missing' });
         }
-        const decode = jwt.verify(token,process.env.JWT_SECRET)
 
-        req.user = decode
-        next()
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Fetch full user record including isPremium status
+        const userData = await user.findByPk(decoded.id);
+
+        if (!userData) {
+            return res.status(401).json({ error: 'User no longer exists' });
+        }
+
+        req.user = userData;
+        next();
+    } catch (err) {
+        err.statusCode = 401;
+        err.message = 'Unauthorised';
+        next(err);
     }
-    catch(err){
-        err.statusCode = 401
-        err.message = 'unauthorised '
-        next(err)
-    }
-}
- module.exports = authenticate
+};
+
+module.exports = authenticate;

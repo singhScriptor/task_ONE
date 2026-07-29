@@ -4,7 +4,6 @@ const { user } = require('../models/index');
 
 const uRL = process.env.CLIENT_BASE_URL || 'http://localhost:3000';
 
-// Instantiate Cashfree using environment variables
 const cashfree = new Cashfree(
   CFEnvironment.SANDBOX,
   process.env.CASHFREE_CLIENT_ID,
@@ -13,13 +12,17 @@ const cashfree = new Cashfree(
 
 const createOrder = async (orderId, amount, customer) => {
   try {
+    // Ensure customer_phone is always a valid 10-digit Indian number starting with 6-9
+    const rawPhone = String(customer.phone || '').replace(/\D/g, '');
+    const validPhone = (rawPhone.length === 10 && /^[6-9]/.test(rawPhone)) ? rawPhone : '9999999999';
+
     const request = {
       order_amount: amount,
       order_currency: 'INR',
       order_id: orderId,
       customer_details: {
         customer_id: `cust_${customer.id}`,
-        customer_phone: customer.phone || '9876543210',
+        customer_phone: validPhone,
         customer_email: customer.email || 'test@example.com'
       },
       order_meta: {
@@ -29,7 +32,6 @@ const createOrder = async (orderId, amount, customer) => {
 
     const response = await cashfree.PGCreateOrder(request);
 
-    // Create entry in database with status PENDING
     await payment.create({
       orderId: String(orderId),
       status: 'PENDING',
@@ -48,9 +50,13 @@ const createOrder = async (orderId, amount, customer) => {
 const verifyOrder = async (orderId, userId) => {
   try {
     const response = await cashfree.PGOrderFetchPayments(orderId);
-    const payments = response.data || response;
 
-    const isSuccess = Array.isArray(payments) && payments.some(p => p.payment_status === 'SUCCESS');
+    // Safely extract transaction array from response
+    const paymentsList = Array.isArray(response)
+      ? response
+      : (Array.isArray(response.data) ? response.data : []);
+
+    const isSuccess = paymentsList.some(p => p.payment_status === 'SUCCESS');
 
     if (isSuccess) {
       await payment.update(
@@ -58,6 +64,7 @@ const verifyOrder = async (orderId, userId) => {
         { where: { orderId: String(orderId), userId: userId } }
       );
 
+      // Update user isPremium status in database
       await user.update(
         { isPremium: true },
         { where: { id: userId } }

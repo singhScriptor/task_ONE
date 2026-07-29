@@ -1,19 +1,22 @@
-
 const { user, expense } = require('../models/index');
 const { Sequelize } = require('sequelize');
 
 const calculateLeaderboard = async () => {
   return await user.findAll({
     attributes: [
+      'id',
       'name',
-      [Sequelize.literal('COALESCE(SUM(expenses.price), 0)'), 'total_expenses']
+      [
+        Sequelize.fn('COALESCE', Sequelize.fn('SUM', Sequelize.col('expenses.price')), 0),
+        'total_expenses'
+      ]
     ],
     include: [{
       model: expense,
-      as: 'expenses',   // must match association alias
+      as: 'expenses',
       attributes: []
     }],
-    group: ['user.id'],
+    group: ['users.id', 'users.name'],
     order: [[Sequelize.literal('total_expenses'), 'DESC']],
     raw: true
   });
