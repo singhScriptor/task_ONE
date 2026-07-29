@@ -71,7 +71,8 @@ async function verifyAndUpdateStatus() {
 
     try {
         if (orderId && orderId !== 'null' && orderId !== 'undefined') {
-            await axios.post(`${V_URL}/${orderId}`, {}, { withCredentials: true });
+            await axios.post(`${V_URL}/${orderId}`, {},
+                { withCredentials: true });
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
@@ -131,7 +132,6 @@ window.showLeaderboard = async function () {
     }
     catch (err) {
         console.error("Leaderboard error:", err);
-        // Do NOT clear section here → leave default <p> intact
     }
 };
 
