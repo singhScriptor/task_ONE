@@ -16,7 +16,7 @@
             <h1>Track Your Expenses</h1>
         </div>
         <div class="header-right">
-            <button type="button" id="premiumBtn"><i class="fa-solid fa-crown"></i> Subscribe</button>
+            <button type="button" id="premiumBtn" style="display: none;"><i class="fa-solid fa-crown"></i> Subscribe</button>
         </div>
     </header>
 
@@ -33,10 +33,10 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Amount</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th>Action</th>
+                                <th style="color: #11998e;">Amount</th>
+                                <th style="color: #11998e;">Description</th>
+                                <th style="color: #11998e;">Category</th>
+                                <th style="color: #11998e;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="expense-table">
@@ -46,9 +46,11 @@
                 </section>
                 <section id="leaderboard" class="tab-section">
                     <h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>
+                    <p id="leaderboard-default">For leaderboard you have to subscribe first.</p>
                 </section>
                 <section id="graphs" class="tab-section">
                     <h3><i class="fa-solid fa-crown"></i> Graphs</h3>
+                    <p id="graphs-default">For graphs you have to subscribe first.</p>
                 </section>
             </main>
         </div>
@@ -107,9 +109,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <script src="../expenseTracker/tabsSlides.js"></script>
-    <script src="../expenseTracker/expense.js"></script>
-    <script src="../expenseTracker/toggleform.js"></script>
+    <script src="../expenseTracker/tabsSlides.js" defer></script>
+    <script src="../expenseTracker/expense.js" defer></script>
+    <script src="../expenseTracker/toggleform.js" defer></script>
 
     <script src="../expenseTracker/payment.js" defer></script>
 

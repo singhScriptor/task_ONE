@@ -1,26 +1,33 @@
+// Run status check on page load
+document.addEventListener("DOMContentLoaded", () => {
+    verifyAndUpdateStatus();
+});
+
+
 const cashfree = Cashfree({ mode: "sandbox" });
 const premiumBtn = document.getElementById("premiumBtn");
+
+// API Endpoints
 const p_URL = "http://localhost:3000/api/premium/payment";
 const V_URL = "http://localhost:3000/api/premium/verify";
 const STATUS_URL = "http://localhost:3000/api/premium/status";
 const LEADERBOARD_URL = "http://localhost:3000/api/premium/showLeaderboard";
 
-// 1. Payment Initiation
+// Payment Initiation
 if (premiumBtn) {
     premiumBtn.addEventListener("click", async () => {
         try {
-            const response = await axios.post(
-                p_URL,
-                { amount: 1000.00 },
-                { withCredentials: true }
-            );
-
+            const response = await axios.post(p_URL, {}, { withCredentials: true });
             const data = response.data;
 
-            cashfree.checkout({
-                paymentSessionId: data.payment_session_id,
-                redirectTarget: "_self"
-            });
+            if (data.payment_session_id) {
+                cashfree.checkout({
+                    paymentSessionId: data.payment_session_id,
+                    redirectTarget: "_self"
+                });
+            } else {
+                alert("Failed to create payment session.");
+            }
         } catch (error) {
             console.error("Payment error:", error);
             alert(error.response?.data?.message || "Failed to initiate payment");
@@ -28,84 +35,114 @@ if (premiumBtn) {
     });
 }
 
-// 2. Status & Verification Logic
+// Global Function: Update Premium UI
+window.updatePremiumUI = function () {
+    const pBtn = document.getElementById("premiumBtn");
+
+    if (pBtn) {
+        const parent = pBtn.parentElement;
+        pBtn.remove(); // Removes Subscribe button
+
+        if (!document.getElementById("prime-header")) {
+            const header = document.createElement("h4");
+            header.id = "prime-header";
+            header.style.color = "#ffffff";
+            header.style.margin = "0";
+            header.style.fontWeight = "bold";
+            header.style.fontSize = "1rem";
+            header.innerHTML = `<i class="fa-solid fa-crown" style="color: #ffd700;"></i> You are a prime member now`;
+
+            if (parent) {
+                parent.appendChild(header);
+            }
+        }
+    }
+    // remove default graph placeholder when premium is active
+    const graphDefault = document.getElementById("graphs-default");
+    if (graphDefault) {
+        graphDefault.remove();
+    }
+};
+
+// Verification & Status Check Flow Handles Page Load / Refresh
 async function verifyAndUpdateStatus() {
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('order_id');
 
     try {
-        if (orderId) {
+        if (orderId && orderId !== 'null' && orderId !== 'undefined') {
             await axios.post(`${V_URL}/${orderId}`, {}, { withCredentials: true });
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
+        // Fetch user status directly from server DB
         const res = await axios.get(STATUS_URL, { withCredentials: true });
         if (res.data?.isPremiumUser === true) {
-            updatePremiumUI();
+            document.getElementById("premiumBtn").style.display = "inline-block"; // added for handling refresh glitch
+            window.updatePremiumUI();
         }
     } catch (err) {
         console.error("Verification/Status error:", err);
     }
 }
 
-// 3. Leaderboard
-async function showLeaderboard() {
+//  Fetch and Display Leaderboard
+window.showLeaderboard = async function () {
     const leaderboardSection = document.getElementById("leaderboard");
-    const existingTable = document.getElementById("leaderboardTable");
-    const leaderBtn = document.getElementById("leaderBtn");
+    if (!leaderboardSection) return;
 
-    if (existingTable) {
-        existingTable.remove();
-        if (leaderBtn) leaderBtn.innerText = "Show Leaderboard";
-        return;
-    }
+    // Clear existing content to prevent duplicate error text
+    leaderboardSection.innerHTML = `<h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>`;
 
     try {
         const response = await axios.get(LEADERBOARD_URL, { withCredentials: true });
         const data = response.data;
 
-        const table = document.createElement("table");
-        table.id = "leaderboardTable";
-        table.innerHTML = `<thead><tr><th>Name</th><th>Total Expenses</th></tr></thead><tbody></tbody>`;
+        if (Array.isArray(data) && data.length > 0) {
+            data.sort((a, b) => (b.total_expenses || 0) - (a.total_expenses || 0));
 
-        const tbody = table.querySelector("tbody");
-        if (Array.isArray(data)) {
+            const table = document.createElement("table");
+            table.id = "leaderboardTable";
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th style="color:teal">Name</th>
+                        <th style="color:teal">Total Expenses</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+
+            const tbody = table.querySelector("tbody");
             data.forEach(user => {
                 const row = document.createElement("tr");
-                row.innerHTML = `<td>${user.name}</td><td>${user.total_expenses || 0}</td>`;
+                row.innerHTML = `<td>${user.name}</td><td>₹${user.total_expenses || 0}</td>`;
                 tbody.appendChild(row);
             });
+
+            leaderboardSection.appendChild(table);
+        } else {
+            const emptyMsg = document.createElement("p");
+            emptyMsg.textContent = "No leaderboard data available.";
+            leaderboardSection.appendChild(emptyMsg);
+        }
+    }
+    catch (err) {
+        // remove default placeholders if premium data was supposed to load
+        document.getElementById("leaderboard-default")?.remove();
+
+        const graph = document.getElementById("graphs-default");
+        if (graph) {
+            graph.remove();   // remove once, don’t append again
         }
 
-        leaderboardSection.appendChild(table);
-        if (leaderBtn) leaderBtn.innerText = "Hide Leaderboard";
-
-    } catch (err) {
         console.error("Leaderboard error:", err);
-    }
-}
-
-// 4. Premium UI Update
-function updatePremiumUI() {
-    if (premiumBtn) premiumBtn.style.display = "none";
-
-    const premiumContainer = document.querySelector(".header-right");
-
-    if (!document.getElementById("premium-header")) {
-        const header = document.createElement("h3");
-        header.innerHTML = `<i class="fa-solid fa-crown"></i> You are a Premium User!`;
-        header.id = "premium-header";
-        premiumContainer.appendChild(header);
+        const leaderboardSection = document.getElementById("leaderboard");
+        const errorMsg = document.createElement("p");
+        errorMsg.style.color = "red";
+        errorMsg.textContent = "Something went wrong while loading leaderboard.";
+        leaderboardSection.appendChild(errorMsg);
     }
 
-    if (!document.getElementById("leaderBtn")) {
-        const leaderBtn = document.createElement("button");
-        leaderBtn.innerText = "Show Leaderboard";
-        leaderBtn.id = "leaderBtn";
-        premiumContainer.appendChild(leaderBtn);
-        leaderBtn.addEventListener("click", showLeaderboard);
-    }
-}
+};
 
-// Run on page load
-document.addEventListener("DOMContentLoaded", verifyAndUpdateStatus);

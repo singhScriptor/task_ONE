@@ -18,16 +18,18 @@ body {
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: radial-gradient(circle at center,
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center,
             rgba(17, 153, 142, 0.15),
             rgba(56, 239, 125, 0.15),
             transparent);
-  filter: blur(60px);
-  z-index: -1;
+    filter: blur(60px);
+    z-index: -1;
 }
 
 /* --- Header --- */
@@ -37,7 +39,7 @@ body::before {
     padding: 1.5rem 2.5rem;
     border-radius: 16px;
     display: grid;
-    grid-template-columns:1fr auto;
+    grid-template-columns: 1fr auto;
     /* Title | Center | Button */
     align-items: center;
     gap: 2rem;
@@ -93,12 +95,32 @@ body::before {
     margin: 0 auto;
 }
 
+#leaderboard-default,
+#graphs-default {
+    color: var(--accent-teal);
+    /* teal color */
+    font-weight: 600;
+    /* a little bolder */
+    margin-top: 0.5rem;
+    /* small spacing */
+}
+
 .left-panel,
 .right-panel {
     background: var(--#eefaf9);
     padding: 2rem;
     border-radius: 16px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.left-panel {
+    height: auto;
+    max-height: 600px;   /* adjust as needed */
+    overflow-y: auto;
+}
+
+.right-panel {
+    max-height: 400px;   /* same height for balance */
 }
 
 
@@ -196,7 +218,8 @@ td {
     box-sizing: border-box;
 }
 
-#submit, #saveBudgetBtn {
+#submit,
+#saveBudgetBtn {
     background: var(--primary-gradient);
     color: white;
     border: none;
@@ -228,12 +251,14 @@ td {
     .main-wrapper {
         grid-template-columns: 1fr;
     }
+
     .stats-container {
         display: flex;
         flex-direction: column;
-        gap:10px;
+        gap: 10px;
         align-items: center;
     }
+
     .stats-container .stat-bottom {
         display: flex !important;
         flex-direction: column !important;
@@ -245,30 +270,36 @@ td {
 /* --- Fix for small screens --- */
 @media (max-width: 514px) {
     .main-wrapper {
-        display: block; /* stack panels vertically */
-        padding: 0;     /* remove extra padding */
+        display: block;
+        /* stack panels vertically */
+        padding: 0;
+        /* remove extra padding */
     }
 
     .left-panel,
     .right-panel {
-        padding: 1rem;  /* lighter padding */
+        padding: 1rem;
+        /* lighter padding */
         border-radius: 12px;
     }
 
     table {
         width: 100%;
-        min-width: unset; /* allow table to shrink */
+        min-width: unset;
+        /* allow table to shrink */
         font-size: 0.85rem;
     }
 
-    th, td {
-        word-break: break-word; /* prevent overflow */
+    th,
+    td {
+        word-break: break-word;
+        /* prevent overflow */
     }
 
     .stats-container {
         display: flex;
         flex-direction: column;
-        gap:10px;
+        gap: 10px;
         align-items: center;
     }
 
@@ -279,21 +310,38 @@ td {
     }
 
     .header-center {
-        flex-wrap: wrap; /* prevent overflow */
+        flex-wrap: wrap;
+        /* prevent overflow */
         gap: 1rem;
         justify-content: center;
     }
-        #tab-content {
-        overflow-x: auto;                 /* enable horizontal scroll */
-        -webkit-overflow-scrolling: touch; /* smooth mobile scrolling */
+
+    #tab-content {
+        overflow-x: auto;
+        /* enable horizontal scroll */
+        -webkit-overflow-scrolling: touch;
+        /* smooth mobile scrolling */
     }
 
     #tab-content table {
-        white-space: nowrap;              /* prevent word wrapping */
+        white-space: nowrap;
+        /* prevent word wrapping */
     }
 
     #tab-content th,
     #tab-content td {
-        white-space: nowrap;              /* keep cells from breaking */
+        white-space: nowrap;
+        /* keep cells from breaking */
+    }
+
+    @media (max-width: 514px) {
+
+        #leaderboard-default,
+        #graphs-default {
+            font-size: 0.9rem;
+            /* slightly smaller text */
+            line-height: 1.4;
+            /* better readability */
+        }
     }
 }
