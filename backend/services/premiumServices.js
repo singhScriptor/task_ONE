@@ -7,7 +7,11 @@ const calculateLeaderboard = async () => {
       'id',
       'name',
       [
-        Sequelize.fn('COALESCE', Sequelize.fn('SUM', Sequelize.col('expenses.price')), 0),
+        /* we use COALESCE to handle null values
+           if SUM is null it will return 0
+           used literal because raw SQL expression
+           is cleaner and more optimized */
+        Sequelize.literal('COALESCE(SUM(expenses.price), 0)'),
         'total_expenses'
       ]
     ],
@@ -16,7 +20,10 @@ const calculateLeaderboard = async () => {
       as: 'expenses',
       attributes: []
     }],
-    group: ['users.id', 'users.name'],
+    group: ['users.id'], // grouping by id
+    /*sequelize.literal let you inject raw sql expression
+    directly into query
+    */
     order: [[Sequelize.literal('total_expenses'), 'DESC']],
     raw: true
   });
