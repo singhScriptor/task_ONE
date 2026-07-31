@@ -25,6 +25,8 @@ const expenseRoutes = require('./routes/expensesRoutes')
 const budgetRoutes = require('./routes/budgetRoutes')
 const subscriptionRoutes = require('./routes/subscriptionRoutes')
 const premiumRoute=require('./routes/premiumRoutes')
+//accessing genAI
+const generativeAiRoutes = require('./routes/genaiRoutes')
 
 //middleware
 const authenticate = require('./middleware/authenticate')
@@ -39,6 +41,8 @@ app.use('/api/expenses',expenseRoutes)
 app.use('/api/budget',budgetRoutes)
 app.use('/api/premium',subscriptionRoutes)
 app.use('/api/premium',premiumRoute)
+// added genAI
+app.use('/api/expenses/ai',generativeAiRoutes)
 
 //accessing frontend folder
 app.use(express.static(path.join(__dirname,'../frontend')))

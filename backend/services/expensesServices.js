@@ -19,7 +19,7 @@ exports.createExpense = async (data, userId) => {
     throw err;
   }
 };
-
+ 
 // Get all expenses for a user
 exports.getAllExpenseById = async (userId) => {
   try {
