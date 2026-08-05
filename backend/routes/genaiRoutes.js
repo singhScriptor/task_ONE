@@ -1,10 +1,12 @@
-const express = require('express')
-const router = express.Router()
-const expenseController = require('../controllers/genAiController')
+const express = require('express');
+const router = express.Router();
+const expenseController = require('../controllers/genAiController');
+const authenticate = require('../middleware/authenticate');
 
 
-router.post('/',expenseController.addExpense)
+router.post('/', authenticate, expenseController.addExpense);
 
-router.get('/summary',expenseController.getMonthlySummary)
 
-module.exports = router
+router.get('/summary', authenticate, expenseController.getMonthlySummary);
+
+module.exports = router;

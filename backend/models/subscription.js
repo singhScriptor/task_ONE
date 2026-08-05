@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize')
 const sequelize  = require('../config/db-connection')
 
-const payment = sequelize.define('subscribtions',{
+const payment = sequelize.define('subscriptions',{
     id:{
         type:DataTypes.INTEGER,
         primaryKey:true,
@@ -22,7 +22,7 @@ const payment = sequelize.define('subscribtions',{
     }
 },
     {
-        tableName:'subscribtions',
+        tableName:'subscriptions',
         timestamps:false
     }
 )

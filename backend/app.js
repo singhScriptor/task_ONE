@@ -1,81 +1,70 @@
-//dotenv
-require('dotenv').config()
+require('dotenv').config();
 
-const express = require('express')
-const path = require('path')
-const cors = require('cors')
-const database = require('./config/db-connection')
-const cookieParser = require('cookie-parser')
-const cashfree = require('cashfree-pg')
+const express = require('express');
+const path = require('path');
+const cors = require('cors');
+const database = require('./config/db-connection');
+const cookieParser = require('cookie-parser');
 
 
+const app = express();
+const port = 3000;
 
-const app = express()
-const port = 3000
+app.use(express.json());
+app.use(cors({ origin: true, credentials: true }));
+app.use(cookieParser());
 
+// Accessing routes files
+const signupRoutes = require('./routes/signupRoutes');
+const signinRoutes = require('./routes/signinRoutes');
+const expenseRoutes = require('./routes/expensesRoutes');
+const budgetRoutes = require('./routes/budgetRoutes');
+const subscriptionRoutes = require('./routes/subscriptionRoutes');
+const premiumRoute = require('./routes/premiumRoutes');
+const generativeAiRoutes = require('./routes/genaiRoutes');
 
-app.use(express.json())
-app.use(cors({origin:true, credentials:true}))
-app.use(cookieParser())
+// Middleware & Error Handling
+const errorhandling = require('./middleware/errorHandler');
 
-//accessing routes files
-const signupRoutes = require('./routes/signupRoutes')
-const signinRoutes = require('./routes/signinRoutes')
-const expenseRoutes = require('./routes/expensesRoutes')
-const budgetRoutes = require('./routes/budgetRoutes')
-const subscriptionRoutes = require('./routes/subscriptionRoutes')
-const premiumRoute=require('./routes/premiumRoutes')
-//accessing genAI
-const generativeAiRoutes = require('./routes/genaiRoutes')
-
-//middleware
-const authenticate = require('./middleware/authenticate')
-
-//errorhandling middleware
-const errorhandling = require('./middleware/errorHandler')
-
-//routes
-app.use('/users',signupRoutes)
-app.use('/users',signinRoutes)
-app.use('/api/expenses',expenseRoutes)
-app.use('/api/budget',budgetRoutes)
-app.use('/api/premium',subscriptionRoutes)
-app.use('/api/premium',premiumRoute)
-// added genAI
-app.use('/api/expenses/ai',generativeAiRoutes)
-
-//accessing frontend folder
-app.use(express.static(path.join(__dirname,'../frontend')))
+// Routes (MOUNT /api/expenses/ai BEFORE /api/expenses)
+app.use('/users', signupRoutes);
+app.use('/users', signinRoutes);
+app.use('/api/expenses/ai', generativeAiRoutes); // <-- Specific sub-route first
+app.use('/api/expenses', expenseRoutes);
+app.use('/api/budget', budgetRoutes);
+app.use('/api/premium', subscriptionRoutes);
+app.use('/api/premium', premiumRoute);
 
 
-//html pages
-app.get('/signup',(req,res)=>{
-    res.sendFile(path.join(__dirname,'../frontend/signup/signup.html'))
-})
+// Frontend static files
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-app.get('/signin',(req,res)=>{
-    res.sendFile(path.join(__dirname,'../frontend/signin/signin.html'))
-})
+// HTML Pages
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/signup/signup.html'));
+});
 
-app.get('/expenses',(req,res)=>{
-    res.sendFile(path.join(__dirname,'../frontend/expenseTracker/expense.html'))
-})
+app.get('/signin', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/signin/signin.html'));
+});
 
-app.get('/',(req,res)=>{
-    res.redirect('/signin')
-})
+app.get('/expenses', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/expenseTracker/expense.html'));
+});
 
-//errorhandler
-app.use(errorhandling)
+app.get('/', (req, res) => {
+    res.redirect('/signin');
+});
 
+// Error handling middleware
+app.use(errorhandling);
 
 database.sync()
-.then(()=>{
-    app.listen(port,()=>{
-        console.log('server is listening...')
+    .then(() => {
+        app.listen(port, () => {
+            console.log('Server is listening on port 3000...');
+        });
     })
-})
-.catch((err)=>{
-    console.log(err.message)
-})
-
+    .catch((err) => {
+        console.log(err.message);
+    });
