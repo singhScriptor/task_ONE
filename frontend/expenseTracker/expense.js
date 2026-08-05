@@ -2,6 +2,7 @@
 const BASE_URL = 'http://localhost:3000/api';
 const EXPENSE_URL = `${BASE_URL}/expenses`;
 const BUDGET_URL = `${BASE_URL}/budget`;
+const summary_URL = `${BASE_URL}/expenses/ai`
 
 const form = document.getElementById('form');
 if (form) {
@@ -29,6 +30,7 @@ async function addExpense(event) {
 
         // Refresh calculations and leaderboard if active
         await updateDashboard();
+
         if (typeof window.showLeaderboard === 'function') {
             window.showLeaderboard();
         }
@@ -58,6 +60,7 @@ async function deleteExpense(id) {
         if (result) {
             document.getElementById(`expense_row_${id}`)?.remove();
             await updateDashboard();
+            
             if (typeof window.showLeaderboard === 'function') {
                 window.showLeaderboard();
             }
@@ -88,6 +91,8 @@ async function updateDashboard() {
         if (budgetEl) budgetEl.innerText = `₹${budgetValue}`;
         if (expenseEl) expenseEl.innerText = `₹${totalExpense}`;
         if (balanceEl) balanceEl.innerText = `₹${(budgetValue - totalExpense)}`;
+
+
     } catch (err) {
         console.error("Dashboard update failed:", err);
     }
@@ -108,6 +113,7 @@ if (saveBudgetBtn) {
         try {
             await axios.post(`${BUDGET_URL}/add-budget`, { amount: val }, { withCredentials: true });
             await updateDashboard();
+
             showSection('expense');
         } catch (err) {
             console.error('Failed to save budget:', err);
@@ -128,3 +134,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error while loading expenses:', err);
     }
 });
+
+async function updateSummary() {
+    try {
+        const res = await axios.get(`${summary_URL}/summary`, { withCredentials: true });
+        const summaryEl = document.querySelector('.summary');
+
+        if (summaryEl && res.data.summary) {
+            // FIX: Access res.data.summary directly as a string
+            summaryEl.innerHTML = `<p>${res.data.summary}</p>`;
+        }
+    } catch (err) {
+        console.error("Failed to load summary:", err.message);
+    }
+}
+
+// Call summary update after dashboard refresh
+document.addEventListener('DOMContentLoaded', async () => {
+    await updateSummary();
+});
+
+
+// Create button dynamically
+const logoutBtn = document.createElement("button");
+logoutBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+logoutBtn.id = "logoutBtn"; // use CSS for styling
+
+logoutBtn.addEventListener("click", async () => {
+  try {
+    // await axios.post("http://localhost:3000/api/logout", {}, { withCredentials: true });
+    window.location.href = "../signin/signin.html";
+  } catch (err) {
+    console.error("Logout failed:", err.message);
+  }
+});
+
+document.body.appendChild(logoutBtn); // append to body instead of header
+
+

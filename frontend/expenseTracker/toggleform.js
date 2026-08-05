@@ -41,3 +41,6 @@ function showSection(section) {
         expenseBtn.style.border = '1px solid #ccc';
     }
 }
+document.addEventListener('DOMContentLoaded', () => {
+    showSection('expense'); // ✅ ensures Add Expense form is visible
+});

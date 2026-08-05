@@ -1,7 +1,5 @@
 // Run status check on page load
-document.addEventListener("DOMContentLoaded", () => {
-    verifyAndUpdateStatus();
-});
+document.addEventListener("DOMContentLoaded",verifyAndUpdateStatus);
 
 
 const cashfree = Cashfree({ mode: "sandbox" });
@@ -17,6 +15,12 @@ const LEADERBOARD_URL = "http://localhost:3000/api/premium/showLeaderboard";
 if (premiumBtn) {
     premiumBtn.addEventListener("click", async () => {
         try {
+            /*
+            {} empty curl for nothing in the body,
+            here axios.post expect(url,data,config)
+            so {} is acting as a placeholder even if
+            we don't send data
+            */
             const response = await axios.post(p_URL, {}, { withCredentials: true });
             const data = response.data;
 
@@ -64,30 +68,31 @@ window.updatePremiumUI = function () {
     }
 };
 
-// Verification & Status Check Flow Handles Page Load / Refresh
+// Verification & Status Check Flow Handles Page Load
+
 async function verifyAndUpdateStatus() {
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('order_id');
 
     try {
         if (orderId && orderId !== 'null' && orderId !== 'undefined') {
-            await axios.post(`${V_URL}/${orderId}`, {},
-                { withCredentials: true });
+            await axios.post(`${V_URL}/${orderId}`, {}, { withCredentials: true });
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // Fetch user status directly from server DB
         const res = await axios.get(STATUS_URL, { withCredentials: true });
         if (res.data?.isPremiumUser === true) {
             window.updatePremiumUI();
-        }
-        else{
-            if (premiumBtn) premiumBtn.style.display = "inline-block";
+            window.showLeaderboard();   // only call if premium
+        } else {
+            // Not premium → leave default <p> intact
+            console.log("User is not premium, showing default placeholders.");
         }
     } catch (err) {
         console.error("Verification/Status error:", err);
     }
 }
+
 
 //  Fetch and Display Leaderboard
 window.showLeaderboard = async function () {
@@ -117,7 +122,7 @@ window.showLeaderboard = async function () {
             const tbody = table.querySelector("tbody");
             data.forEach(user => {
                 const row = document.createElement("tr");
-                row.innerHTML = `<td>${user.name}</td><td>₹${user.total_expenses || 0}</td>`;
+                row.innerHTML = `<td>${user.name}</td><td>₹${user.total_expense || 0}</td>`;
                 tbody.appendChild(row);
             });
 

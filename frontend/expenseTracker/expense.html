@@ -19,40 +19,47 @@
             <button type="button" id="premiumBtn"><i class="fa-solid fa-crown"></i> Subscribe</button>
         </div>
     </header>
-
     <div class="main-wrapper">
-        <div class="left-panel">
-            <nav class="tab-bar">
-                <button class="tab-btn active" data-tab="expenses">Expense Details</button>
-                <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
-                <button class="tab-btn" data-tab="graphs">Graphs</button>
-            </nav>
+        <div class="left-column">
+            <div class="summary">
+                <!-- put summary content here -->
+                <p>Total Summary goes here...</p>
+            </div>
 
-            <main id="tab-content">
-                <section id="expenses" class="tab-section active">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="color: #11998e;">Amount</th>
-                                <th style="color: #11998e;">Description</th>
-                                <th style="color: #11998e;">Category</th>
-                                <th style="color: #11998e;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expense-table">
 
-                        </tbody>
-                    </table>
-                </section>
-                <section id="leaderboard" class="tab-section">
-                    <h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>
-                    <p id="leaderboard-default">For leaderboard you have to subscribe first.</p>
-                </section>
-                <section id="graphs" class="tab-section">
-                    <h3><i class="fa-solid fa-crown"></i> Graphs</h3>
-                    <p id="graphs-default">For graphs you have to subscribe first.</p>
-                </section>
-            </main>
+            <div class="left-panel">
+                <nav class="tab-bar">
+                    <button class="tab-btn active" data-tab="expenses">Expense Details</button>
+                    <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
+                    <button class="tab-btn" data-tab="graphs">Graphs</button>
+                </nav>
+
+                <main id="tab-content">
+                    <section id="expenses" class="tab-section active">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="color: #11998e;">Amount</th>
+                                    <th style="color: #11998e;">Description</th>
+                                    <th style="color: #11998e;">Category</th>
+                                    <th style="color: #11998e;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expense-table">
+
+                            </tbody>
+                        </table>
+                    </section>
+                    <section id="leaderboard" class="tab-section">
+                        <h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>
+                        <p id="leaderboard-default">For leaderboard you have to subscribe first.</p>
+                    </section>
+                    <section id="graphs" class="tab-section">
+                        <h3><i class="fa-solid fa-crown"></i> Graphs</h3>
+                        <p id="graphs-default">For graphs you have to subscribe first.</p>
+                    </section>
+                </main>
+            </div>
         </div>
 
         <div class="right-column">
@@ -65,7 +72,6 @@
                     <div>Balance: <span id="balance"></span></div>
                 </div>
             </div>
-
             <div class="right-panel">
 
                 <div class="header-switcher" style="display: flex; margin: 0; padding: 0;">
@@ -85,11 +91,14 @@
                     <textarea class="form-control" id="description" required></textarea>
                     <label for="category">Category</label>
                     <select class="form-control" id="category" required>
-                        <option value="select">Select</option>
+
                         <option value="food">Food</option>
                         <option value="travel">Travel</option>
+                        <option value="shopping">Shopping</option>
+                        <option value="bills">Bills</option>
                         <option value="salary">Salary</option>
                         <option value="petrol">Petrol</option>
+                        <option value="Other">Other</option>
                     </select>
                     <button type="submit" id="submit" class="form-control">Add Expense</button>
                 </form>
@@ -103,8 +112,6 @@
             </div>
         </div>
     </div>
-
-
     <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
