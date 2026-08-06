@@ -1,0 +1,147 @@
+body {
+  background: #f5f7fa;
+  color: #1a6726;
+  margin: 0;
+}
+
+/* Subtle glow */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(circle at center,
+            rgba(17, 153, 142, 0.15),
+            rgba(56, 239, 125, 0.15),
+            transparent);
+  filter: blur(60px);
+  z-index: -1;
+}
+
+#main-div {
+  display: flex;
+  padding: 20px;
+  margin: 10px;
+  margin-left: 50px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 40px;
+}
+
+#header {
+  background: linear-gradient(135deg, #11998e, #38ef7d);
+  color: #fff;
+  border: none;
+  padding: 20px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(17, 153, 142, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 25%;
+  min-width: fit-content;
+  white-space: nowrap;
+  height: 70vh;
+  margin-top: 40px;
+}
+
+
+
+#forgot-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 50%;
+  font-weight: bold;
+  padding: 10px;
+  margin: 10px;
+}
+
+.form-label {
+  margin: 5px 0;
+}
+
+.form-control {
+  padding: 13px;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  width: 100%;
+  background: #fff;
+  color: #1a1a1a;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+.form-control:focus {
+  border-color: #38ef7d;
+  box-shadow: 0 0 6px rgba(56, 239, 125, 0.6);
+  outline: none;
+}
+
+#submit {
+  background: linear-gradient(135deg, #38ef7d, #11998e);
+  color: #fff;
+  border: none;
+  padding: 15px 20px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 10px 0;
+  width: 220px;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(17, 153, 142, 0.4);
+  transition: all 0.3s ease;
+}
+
+#submit:hover {
+  background: linear-gradient(135deg, #11998e, #38ef7d);
+  box-shadow: 0 0 12px rgba(56, 239, 125, 0.6);
+  transform: scale(1.03);
+}
+
+p a {
+  color: #11998e;
+  font-weight: bold;
+  text-decoration: none;
+}
+p a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+  #main-div {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0;
+    gap: 20px;
+  }
+
+  #header {
+    width: 90%;
+    height: auto;
+    margin-top: 20px;
+    font-size: 1.4rem;
+    padding: 15px;
+  }
+
+  #forgot-form {
+    width: 95%;
+    margin: 0;
+    padding: 15px;
+  }
+
+  .form-control {
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  #submit {
+    width: 100%;
+    max-width: 300px;
+    font-size: 0.95rem;
+    padding: 12px 15px;
+  }
+}

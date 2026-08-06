@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forgot Password</title>
+  <link rel="stylesheet" href="../forgotPassword/forgot.css">
+</head>
+<body>
+  <div id="main-div">
+    <!-- Header with Glassmorphism Card Style -->
+    <div id="header">
+      <h1>Can't log in?</h1>
+    </div>
+
+    <form id="forgot-form">
+      <label for="email" class="form-label">Enter your email:</label>
+      <input type="email" class="form-control" id="email" name="email" placeholder="example@mail.com" required>
+
+      <div id="submit-btn">
+        <button type="submit" id="submit">Send Reset Link</button>
+      </div>
+
+      <p><a href="../signin/signin.html">Back to Sign In</a></p>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="./forgot.js"></script>
+</body>
+</html>
