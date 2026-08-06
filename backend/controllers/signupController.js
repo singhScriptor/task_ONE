@@ -9,9 +9,10 @@ exports.signupUser = async(req,res,next)=>{
             return res.status(400).json({message:'All fields are required!'})
         }
         const result = await signupService.signup({name,email,phone,password})
-        res.status(200).json(result)
+        res.status(201).json(result)
     }
     catch(err){
+        console.error(err)
         err.statusCode = err.statusCode || 500
         next(err)
     }

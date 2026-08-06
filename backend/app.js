@@ -22,18 +22,20 @@ const budgetRoutes = require('./routes/budgetRoutes');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const premiumRoute = require('./routes/premiumRoutes');
 const generativeAiRoutes = require('./routes/genaiRoutes');
+const forgotRoutes = require('./routes/forgotRoutes')
 
 // Middleware & Error Handling
 const errorhandling = require('./middleware/errorHandler');
 
-// Routes (MOUNT /api/expenses/ai BEFORE /api/expenses)
+// Routes (MOUNT /api/expenses/ai/api/expenses)
 app.use('/users', signupRoutes);
 app.use('/users', signinRoutes);
-app.use('/api/expenses/ai', generativeAiRoutes); // <-- Specific sub-route first
+app.use('/api/expenses/ai', generativeAiRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/budget', budgetRoutes);
 app.use('/api/premium', subscriptionRoutes);
 app.use('/api/premium', premiumRoute);
+app.use('/password',forgotRoutes)
 
 
 // Frontend static files
@@ -50,6 +52,10 @@ app.get('/signin', (req, res) => {
 
 app.get('/expenses', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/expenseTracker/expense.html'));
+});
+
+app.get('/forgot-password', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/forgotPassword/forgot.html'));
 });
 
 app.get('/', (req, res) => {

@@ -34,7 +34,6 @@ const users = sequelize.define('users',{
         type:DataTypes.INTEGER,
         defaultValue:0
     }
-
 },
     {
         tableName:'users',
