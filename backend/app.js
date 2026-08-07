@@ -24,6 +24,7 @@ const premiumRoute = require('./routes/premiumRoutes');
 const generativeAiRoutes = require('./routes/genaiRoutes');
 const forgotRoutes = require('./routes/forgotRoutes')
 
+
 // middleware & error handling
 const errorhandling = require('./middleware/errorHandler');
 
@@ -36,6 +37,7 @@ app.use('/api/budget', budgetRoutes);
 app.use('/api/premium', subscriptionRoutes);
 app.use('/api/premium', premiumRoute);
 app.use('/password',forgotRoutes)
+
 
 
 // frontend static files
@@ -56,6 +58,10 @@ app.get('/expenses', (req, res) => {
 
 app.get('/forgot-password', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/forgotPassword/forgot.html'));
+});
+
+app.get('/password/resetpassword/:id', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/resetPassword/reset.html'));
 });
 
 app.get('/', (req, res) => {

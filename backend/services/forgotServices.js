@@ -1,6 +1,7 @@
 const {user : User} = require("../models/index");
 const forgotPasswordRequest = require("../models/forgotPasswordReset");
 const { BrevoClient } = require("@getbrevo/brevo");
+const bcrypt = require("bcrypt")
 
 exports.forgotPassword = async (email) => {
   // check if user exists
@@ -38,10 +39,53 @@ exports.forgotPassword = async (email) => {
     return { message: "Password reset mail sent successfully!" };
   } catch (err) {
     // deactivate request if mailing fails
-    await resetReq.update({ isactive: false });
+    await resetReq.update({ isActive: false });
 
     const error = new Error("Failed to send reset link");
     error.statusCode = 500;
     throw error;
   }
+};
+
+
+exports.resetPassword = async (reqId) => {
+  const resetReq = await forgotPasswordRequest.findOne({
+    where: { id: reqId, isActive: true }
+  });
+
+  if (!resetReq) {
+    const error = new Error("Link is invalid or has expired.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return { message: "Token is valid" };
+};
+
+//update the users password and expire the token
+exports.updatePassword = async (reqId, newPassword) => {
+  const resetReq = await forgotPasswordRequest.findOne({
+    where: { id: reqId, isActive: true }
+  });
+
+  if (!resetReq) {
+    const error = new Error("Link is invalid or has expired.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const user = await User.findByPk(resetReq.userId);
+  if (!user) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  // Update user password and deactivate the token so it cannot be reused
+  await user.update({ password: hashedPassword });
+  await resetReq.update({ isActive: false });
+
+  return { message: "Password updated successfully!" };
 };
