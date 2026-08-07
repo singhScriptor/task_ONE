@@ -39,10 +39,10 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th style="color: #11998e;">Amount</th>
-                                    <th style="color: #11998e;">Description</th>
-                                    <th style="color: #11998e;">Category</th>
-                                    <th style="color: #11998e;">Action</th>
+                                    <th >Amount</th>
+                                    <th >Description</th>
+                                    <th >Category</th>
+                                    <th >Action</th>
                                 </tr>
                             </thead>
                             <tbody id="expense-table">
@@ -74,13 +74,11 @@
             </div>
             <div class="right-panel">
 
-                <div class="header-switcher" style="display: flex; margin: 0; padding: 0;">
-                    <button id="expenseHeader" class="active-header" onclick="showSection('expense')"
-                        style="flex: 1; padding: 10px; cursor: pointer; border: 1px solid #11998e; background: #11998e; color: white; font-weight: bold; border-radius: 8px 0 0 8px;">
+                <div class="header-switcher">
+                    <button id="expenseHeader" class="active-header" onclick="showSection('expense')">
                         Add Expense
                     </button>
-                    <button id="budgetHeader" onclick="showSection('budget')"
-                        style="flex: 1; padding: 10px; cursor: pointer; border: 1px solid #ccc; background: white; color: #636e72; font-weight: bold; border-radius: 0 8px 8px 0;">
+                    <button id="budgetHeader" onclick="showSection('budget')">
                         Add Budget
                     </button>
                 </div>
@@ -105,7 +103,7 @@
 
                 <!-- The New Budget Form -->
                 <form id="budgetForm" style="display:none;">
-                    <label for="budgetInput" style="margin: 5px;">Budget-Amount:</label>
+                    <label for="budgetInput">Budget-Amount:</label>
                     <input type="number" class="form-control" id="budgetInput" required>
                     <button type="button" id="saveBudgetBtn" class="form-control">Save Budget</button>
                 </form>

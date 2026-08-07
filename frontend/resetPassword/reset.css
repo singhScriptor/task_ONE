@@ -3,7 +3,7 @@
     --primary-gradient: linear-gradient(135deg, #8e2de2, #ff6fd8);
     --primary-hover: linear-gradient(135deg, #7b1fa2, #f06292);
     --accent-purple: #8e2de2;
-    --accent-glow: rgba(142, 45, 226, 0.15);
+    --accent-glow: rgba(142, 45, 226, 0.3);
 
     --bg-color: #f8fafc;
     --border-color: #e2e8f0;
@@ -13,12 +13,11 @@
     --radius-sm: 5px;
     --radius-header: 10px;
     --shadow-header: 0 0 10px rgba(142, 45, 226, 0.25);
-    --shadow-btn: 0 2px 4px rgba(142, 45, 226, 0.25);
-    --shadow-btn-hover: 0 0 10px rgba(142, 45, 226, 0.35);
+    --shadow-btn: 0 4px 6px rgba(142, 45, 226, 0.25);
+    --shadow-btn-hover: 0 0 12px rgba(142, 45, 226, 0.35);
 
     /* Transitions */
-    --transition-fast: all 0.2s ease;
-    --transition-btn: all 0.3s ease;
+    --transition-fast: all 0.3s ease;
 }
 
 body {
@@ -55,7 +54,7 @@ body::before {
     gap: 40px;
 }
 
-/* Desktop Side Panel Header */
+/* Header styled identically to Forgot Password */
 #header {
     background: var(--primary-gradient);
     color: #ffffff;
@@ -75,7 +74,8 @@ body::before {
     margin-top: 40px;
 }
 
-#forgot-form {
+/* Reset Form styling */
+#reset-form {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -87,46 +87,49 @@ body::before {
 }
 
 .form-label {
-    margin: 5px 0;
+    margin: 10px 0 5px 0;
 }
 
 .form-control {
-    padding: 12px;
+    padding: 13px;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     width: 100%;
     background: #ffffff;
     color: var(--text-dark);
-    margin-top: 8px;
+    margin-top: 5px;
     box-sizing: border-box;
-    transition: var(--transition-fast);
 }
 
 .form-control:focus {
     border-color: var(--accent-purple);
-    box-shadow: 0 0 0 3px var(--accent-glow);
+    box-shadow: 0 0 6px var(--accent-glow);
     outline: none;
+}
+
+#submit-btn {
+    margin-top: 15px;
 }
 
 #submit {
     background: var(--primary-gradient);
     color: #ffffff;
     border: none;
-    padding: 14px 18px;
+    padding: 15px 20px;
     border-radius: var(--radius-sm);
     font-size: 1rem;
     cursor: pointer;
-    margin: 12px 0;
+    margin: 10px 0;
     width: 220px;
     font-weight: bold;
     box-shadow: var(--shadow-btn);
-    transition: var(--transition-btn);
+    transition: var(--transition-fast);
 }
 
 #submit:hover {
     background: var(--primary-hover);
     box-shadow: var(--shadow-btn-hover);
-    transform: translateY(-1px);
+    transform: scale(1.03);
 }
 
 p a {
@@ -149,7 +152,7 @@ p a:hover {
         gap: 20px;
     }
 
-    /* Converts vertical column into horizontal banner for screens <= 850px */
+    /* Convert vertical panel into horizontal banner for screens <= 850px */
     #header {
         width: 90%;
         height: auto;
@@ -159,7 +162,7 @@ p a:hover {
         white-space: normal;
     }
 
-    #forgot-form {
+    #reset-form {
         width: 90%;
         margin: 0;
         padding: 10px;
@@ -171,7 +174,7 @@ p a:hover {
         width: 95%;
     }
 
-    #forgot-form {
+    #reset-form {
         width: 95%;
         padding: 15px;
     }

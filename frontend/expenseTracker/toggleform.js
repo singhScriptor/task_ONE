@@ -10,13 +10,13 @@ function showSection(section) {
         expenseForm.style.display = 'block';
         budgetForm.style.display = 'none';
 
-        expenseBtn.style.background = '#11998e';
-        expenseBtn.style.color = 'white';
-        expenseBtn.style.border = '1px solid #11998e';
+        expenseBtn.style.background = 'var(--primary-gradient)';
+        expenseBtn.style.color = '#fff';
+        expenseBtn.style.border = '1px solid var(--accent-purple)';
 
-        budgetBtn.style.background = 'white';
-        budgetBtn.style.color = '#636e72';
-        budgetBtn.style.border = '1px solid #ccc';
+        budgetBtn.style.background = 'var(--card-bg)';
+        budgetBtn.style.color = 'var(--text-muted)';
+        budgetBtn.style.border = '1px solid var(--border-color)';
     } else {
         expenseForm.style.display = 'none';
         budgetForm.style.display = 'block';
@@ -32,13 +32,13 @@ function showSection(section) {
             saveBudgetBtn.innerText = 'Save Budget';
         }
 
-        budgetBtn.style.background = '#11998e';
-        budgetBtn.style.color = 'white';
-        budgetBtn.style.border = '1px solid #11998e';
+        budgetBtn.style.background = 'var(--primary-gradient)';
+        budgetBtn.style.color = '#fff';
+        budgetBtn.style.border = '1px solid var(--accent-purple)';
 
-        expenseBtn.style.background = 'white';
-        expenseBtn.style.color = '#636e72';
-        expenseBtn.style.border = '1px solid #ccc';
+        expenseBtn.style.background = 'var(--card-bg)';
+        expenseBtn.style.color = 'var(--text-muted)';
+        expenseBtn.style.border = '1px solid var(--border-color)';
     }
 }
 document.addEventListener('DOMContentLoaded', () => {
