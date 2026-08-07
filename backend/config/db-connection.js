@@ -3,10 +3,11 @@ const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(
     'expense_tracker',
     'root',
-    'Supra@A90',
+    process.env.LOCALHOST_PASSWORD,
     {
         host:'localhost',
-        dialect:'mysql'
+        dialect:'mysql',
+        logging:false
     }
 );
 

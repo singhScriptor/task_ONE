@@ -1,11 +1,9 @@
 require('dotenv').config();
 const { GoogleGenAI } = require('@google/genai');
 
-// const ai = new GoogleGenAI({});
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
-
-exports.categorizeExpenses = async (description) => {
+const categorizeExpenses = async (description) => {
     try {
         const interaction = await ai.interactions.create({
             model: "gemini-3.6-flash",
@@ -14,12 +12,12 @@ exports.categorizeExpenses = async (description) => {
 
         return interaction.output_text;
     } catch (err) {
+        console.error("Categorize expense error:", err.message);
         throw err;
     }
 };
 
-// In services/genaiServices.js
-exports.summarizeExpenses = async (expenses) => {
+const summarizeExpenses = async (expenses) => {
     if (!expenses || expenses.length === 0) {
         return "No expenses available to summarize.";
     }
@@ -33,17 +31,17 @@ exports.summarizeExpenses = async (expenses) => {
 
         const interaction = await ai.interactions.create({
             model: "gemini-3.6-flash",
-            input: `Summarize these expenses in plain text only.
-            No markdown, no headings, no lists.
-            Keep it under 3 sentences.
-            Highlight top category,
-            overspending area, and give one saving tip:
-            ${JSON.stringify(cleanExpenses)}`,
-            //stream: true
+            input: `Summarize these expenses in plain text (under 3 sentences, no markdown/lists). Highlight the top category, overspending area, and one saving tip: ${JSON.stringify(cleanExpenses)}`,
         });
-        return interaction.output_text || "No summary generated."
+
+        return interaction.output_text || "No summary generated.";
     } catch (err) {
-        console.error("Summarize Expenses Error:", err);
-        throw err; // Let express errorHandler send proper HTTP status
+        console.error("Summarize expenses error:", err.message);
+        throw  err;
     }
+};
+
+module.exports = {
+    categorizeExpenses,
+    summarizeExpenses
 };

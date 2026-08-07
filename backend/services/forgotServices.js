@@ -1,8 +1,9 @@
-const User = require("../models/users");
+const {user : User} = require("../models/index");
+const forgotPasswordRequest = require("../models/forgotPasswordReset");
 const { BrevoClient } = require("@getbrevo/brevo");
 
 exports.forgotPassword = async (email) => {
-  // Check if user exists in database
+  // check if user exists
   const user = await User.findOne({ where: { email: email } });
 
   if (!user) {
@@ -11,22 +12,34 @@ exports.forgotPassword = async (email) => {
     throw error;
   }
 
-  // Create brevo client instance inside function
+  // create db request record where sequelize generates the uuid automatically
+  const resetReq = await forgotPasswordRequest.create({
+    userId: user.id,
+    isActive: true
+  });
+
   const brevo = new BrevoClient({
     apiKey: process.env.BREVO_API_KEY
   });
 
+  // full URL sent to user
+  const resetUrl = `http://localhost:3000/password/resetpassword/${resetReq.id}`;
+
   try {
-    // Send reset email
+    // send email using template
     await brevo.transactionalEmails.sendTransacEmail({
-      sender: { email: process.env.SENDER_EMAIL },
       to: [{ email: email }],
-      subject: "Reset Password Link",
-      htmlContent: `<p>Click here to reset your password: <a href="http://localhost:3000/signin">Reset Password</a></p>`
+      templateId: Number(process.env.BREVO_TEMPLATE_ID),
+      params: {
+        resetLink: resetUrl // url from template saved inside brevo
+      }
     });
 
     return { message: "Password reset mail sent successfully!" };
   } catch (err) {
+    // deactivate request if mailing fails
+    await resetReq.update({ isactive: false });
+
     const error = new Error("Failed to send reset link");
     error.statusCode = 500;
     throw error;

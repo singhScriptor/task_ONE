@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
 
-// Accessing routes files
+// accessing routes files
 const signupRoutes = require('./routes/signupRoutes');
 const signinRoutes = require('./routes/signinRoutes');
 const expenseRoutes = require('./routes/expensesRoutes');
@@ -24,10 +24,10 @@ const premiumRoute = require('./routes/premiumRoutes');
 const generativeAiRoutes = require('./routes/genaiRoutes');
 const forgotRoutes = require('./routes/forgotRoutes')
 
-// Middleware & Error Handling
+// middleware & error handling
 const errorhandling = require('./middleware/errorHandler');
 
-// Routes (MOUNT /api/expenses/ai/api/expenses)
+// routes
 app.use('/users', signupRoutes);
 app.use('/users', signinRoutes);
 app.use('/api/expenses/ai', generativeAiRoutes);
@@ -38,7 +38,7 @@ app.use('/api/premium', premiumRoute);
 app.use('/password',forgotRoutes)
 
 
-// Frontend static files
+// frontend static files
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // HTML Pages
@@ -62,7 +62,7 @@ app.get('/', (req, res) => {
     res.redirect('/signin');
 });
 
-// Error handling middleware
+// error handling middleware
 app.use(errorhandling);
 
 database.sync()

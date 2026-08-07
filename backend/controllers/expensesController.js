@@ -37,9 +37,13 @@ exports.deleteExpenses = async(req,res,next)=>{
         const deleted = await expenseService.deleteExpenseByIdAndUserId(id,userId)
 
         if(!deleted){
-            return res.status(404).json({message:"expense not found or authorised"})
+            return res.status(404).json({
+                message:"expense not found or authorised"
+            })
         }
-        res.status(200).json({message:'expense successfully deleted'})
+        res.status(200).json({
+            message:'expense successfully deleted'
+        })
     }
     catch(err){
         err.statusCode= 500

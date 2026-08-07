@@ -2,7 +2,7 @@ const { Cashfree, CFEnvironment } = require('cashfree-pg');
 const payment = require('../models/subscription');
 const { user } = require('../models/index');
 
-const uRL = process.env.CLIENT_BASE_URL || 'http://localhost:3000';
+const clientUrl = process.env.CLIENT_BASE_URL || 'http://localhost:3000';
 
 const cashfree = new Cashfree(
   CFEnvironment.SANDBOX,
@@ -12,9 +12,12 @@ const cashfree = new Cashfree(
 
 const createOrder = async (orderId, amount, customer) => {
   try {
-    // Ensure customer_phone is always a valid 10-digit Indian number starting with 6-9
-    const rawPhone = String(customer.phone || '').replace(/\D/g, '');
-    const validPhone = (rawPhone.length === 10 && /^[6-9]/.test(rawPhone)) ? rawPhone : '9999999999';
+    let phone = String(customer.phone || '');
+
+    // check fallback for sandbox testing
+    if (phone.length !== 10) {
+      phone = '9999999999';
+    }
 
     const request = {
       order_amount: amount,
@@ -22,11 +25,11 @@ const createOrder = async (orderId, amount, customer) => {
       order_id: orderId,
       customer_details: {
         customer_id: `cust_${customer.id}`,
-        customer_phone: validPhone,
+        customer_phone: phone,
         customer_email: customer.email || 'test@example.com'
       },
       order_meta: {
-        return_url: `${uRL}/expenses?order_id={order_id}`
+        return_url: `${clientUrl}/expenses?order_id={order_id}`
       }
     };
 
@@ -38,11 +41,9 @@ const createOrder = async (orderId, amount, customer) => {
       userId: customer.id
     });
 
-    const responseData = response.data || response;
-    return responseData.payment_session_id;
-
+    return response.data?.payment_session_id || response.payment_session_id;
   } catch (error) {
-    console.error('Error creating Cashfree order:', error.response?.data?.message || error.message);
+    console.error('Cashfree createOrder error:', error.response?.data?.message || error.message);
     throw error;
   }
 };
@@ -50,38 +51,32 @@ const createOrder = async (orderId, amount, customer) => {
 const verifyOrder = async (orderId, userId) => {
   try {
     const response = await cashfree.PGOrderFetchPayments(orderId);
+    const payments = response.data || response;
 
-    // Safely extract transaction array from response
-    const paymentsList = Array.isArray(response)
-      ? response
-      : (Array.isArray(response.data) ? response.data : []);
-
-    const isSuccess = paymentsList.some(p => p.payment_status === 'SUCCESS');
+    const isSuccess = Array.isArray(payments) && payments.some(p => p.payment_status === 'SUCCESS');
 
     if (isSuccess) {
       await payment.update(
         { status: 'SUCCESS' },
-        { where: { orderId: String(orderId), userId: userId } }
+        { where: { orderId: String(orderId), userId } }
       );
 
-      // Update user isPremium status in database
       await user.update(
         { isPremium: true },
         { where: { id: userId } }
       );
 
       return { status: 'SUCCESS', message: 'Payment successful! You are now a premium user.' };
-    } else {
-      await payment.update(
-        { status: 'FAILED' },
-        { where: { orderId: String(orderId), userId: userId } }
-      );
-
-      return { status: 'FAILED', message: 'Payment was not successful.' };
     }
 
+    await payment.update(
+      { status: 'FAILED' },
+      { where: { orderId: String(orderId), userId } }
+    );
+
+    return { status: 'FAILED', message: 'Payment was not successful.' };
   } catch (error) {
-    console.error('Error verifying Cashfree order:', error.response?.data?.message || error.message);
+    console.error('Cashfree verifyOrder error:', error.response?.data?.message || error.message);
     throw error;
   }
 };
