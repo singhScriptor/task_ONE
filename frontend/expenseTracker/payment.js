@@ -140,26 +140,23 @@ window.showLeaderboard = async function () {
         console.error("Leaderboard error:", err);
     }
 };
+
 // display Expense Reports
 window.showReport = async function () {
     const reportDefault = document.getElementById("report-default");
-    const reportContent = document.getElementById("report-content");
+    const reportTableBody = document.getElementById("report-table");
     const downloadBtn = document.getElementById("downloadReportBtn");
 
     try {
-        // You can point this to your actual report endpoint once ready
-        // const response = await axios.get("http://localhost:3000/api/premium/reports", { withCredentials: true });
-        // const data = response.data;
+        if (reportDefault) reportDefault.style.display = "none";
 
-        // For now, handling the UI state toggle seamlessly in the same style:
-        if (reportDefault) {
-            reportDefault.style.display = "none";
-        }
-        if (reportContent) {
-            reportContent.style.display = "block";
+        const parentTable = reportTableBody ? reportTableBody.closest("table") : null;
+        if (parentTable) {
+            parentTable.classList.add("active-report"); // Unlocks and displays properly across all screens
         }
 
         if (downloadBtn) {
+            downloadBtn.style.display = "flex";
             downloadBtn.disabled = false;
             downloadBtn.style.backgroundColor = "teal";
             downloadBtn.style.cursor = "pointer";
@@ -168,5 +165,4 @@ window.showReport = async function () {
         console.error("Report loading error:", err);
     }
 };
-
 
