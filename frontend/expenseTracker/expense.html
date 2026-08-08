@@ -32,6 +32,7 @@
                     <button class="tab-btn active" data-tab="expenses">Expense Details</button>
                     <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
                     <button class="tab-btn" data-tab="graphs">Graphs</button>
+                    <button class="tab-btn" data-tab="reports">Reports</button>
                 </nav>
 
                 <main id="tab-content">
@@ -39,10 +40,10 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th >Amount</th>
-                                    <th >Description</th>
-                                    <th >Category</th>
-                                    <th >Action</th>
+                                    <th>Amount</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="expense-table">
@@ -58,6 +59,39 @@
                         <h3><i class="fa-solid fa-crown"></i> Graphs</h3>
                         <p id="graphs-default">For graphs you have to subscribe first.</p>
                     </section>
+                    <section id="reports" class="tab-section">
+                        <h3><i class="fa-solid fa-crown"></i> Report</h3>
+                        <p id="report-default">For report you have to subscribe first.</p>
+
+                        <div id="report-content" style="display: none;">
+                            <!-- Sub-switcher Toggle Buttons -->
+                            <div class="header-switcher" id="report-switcher">
+                                <button class="active-header" data-report="daily">Daily</button>
+                                <button data-report="monthly">Monthly</button>
+                                <button data-report="yearly">Yearly</button>
+                            </div>
+
+                            <div class="report-container">
+                                <table id="report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Period</th>
+                                            <th>Income</th>
+                                            <th>Expense</th>
+                                            <th>Saving</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+
+                            <!-- Download Icon Button -->
+                            <button id="downloadReportBtn" disabled title="Download Expenses File">
+                                <i class="fa-solid fa-download"></i>
+                            </button>
+                        </div>
+                    </section>
+
                 </main>
             </div>
         </div>
@@ -119,6 +153,7 @@
     <script src="../expenseTracker/toggleform.js" defer></script>
 
     <script src="../expenseTracker/payment.js" defer></script>
+    <script src="../expenseTracker/reportTabs.js" defer></script>
 
 </body>
 

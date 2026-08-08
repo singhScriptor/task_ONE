@@ -83,7 +83,8 @@ async function verifyAndUpdateStatus() {
         const res = await axios.get(STATUS_URL, { withCredentials: true });
         if (res.data?.isPremiumUser === true) {
             window.updatePremiumUI();
-            window.showLeaderboard();   // only call if premium
+            window.showLeaderboard();// only call if premium
+            window.showReport()
         } else {
             // Not premium → leave default <p> intact
             console.log("User is not premium, showing default placeholders.");
@@ -137,6 +138,34 @@ window.showLeaderboard = async function () {
     }
     catch (err) {
         console.error("Leaderboard error:", err);
+    }
+};
+// display Expense Reports
+window.showReport = async function () {
+    const reportDefault = document.getElementById("report-default");
+    const reportContent = document.getElementById("report-content");
+    const downloadBtn = document.getElementById("downloadReportBtn");
+
+    try {
+        // You can point this to your actual report endpoint once ready
+        // const response = await axios.get("http://localhost:3000/api/premium/reports", { withCredentials: true });
+        // const data = response.data;
+
+        // For now, handling the UI state toggle seamlessly in the same style:
+        if (reportDefault) {
+            reportDefault.style.display = "none";
+        }
+        if (reportContent) {
+            reportContent.style.display = "block";
+        }
+
+        if (downloadBtn) {
+            downloadBtn.disabled = false;
+            downloadBtn.style.backgroundColor = "teal";
+            downloadBtn.style.cursor = "pointer";
+        }
+    } catch (err) {
+        console.error("Report loading error:", err);
     }
 };
 

@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (targetId === 'leaderboard' && typeof window.showLeaderboard === 'function') {
                 window.showLeaderboard();
             }
+            if(targetId === 'report' && typeof window.showReport === 'function'){
+                window.showReport()
+            }
         });
     });
 });
