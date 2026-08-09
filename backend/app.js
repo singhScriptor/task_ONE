@@ -73,7 +73,7 @@ app.get('/', (req, res) => {
 // error handling middleware
 app.use(errorhandling);
 
-database.sync({alter:true})
+database.sync()
     .then(() => {
         app.listen(port, () => {
             console.log('Server is listening on port 3000...');
