@@ -36,7 +36,7 @@ body {
     color: var(--text-dark);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     padding: clamp(8px, 3vw, 24px);
-    padding-bottom: 75px;
+    padding-bottom: 90px;
     min-height: 100vh;
     min-width: 300px;
     -webkit-font-smoothing: antialiased;
@@ -319,9 +319,10 @@ body {
 }
 
 #tab-content {
-    max-height: 380px;
-    overflow-y: auto;
+    /*max-height: 380px;
+    overflow-y: auto;*/
     scrollbar-width: none;
+    padding-bottom: 0.5rem;
 }
 
 /* --- Table Design (Desktop Default) --- */
@@ -430,13 +431,58 @@ label {
     cursor: pointer;
 }
 
-
-@media (max-width: 850px) {
-    .main-wrapper {
-        grid-template-columns: 1fr;
-    }
+#leaderboard h3 .fa-crown {
+    color: var(--accent-purple);
 }
 
+/* --- Pagination   --- */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 1.25rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.pagination-btn {
+    width: auto !important;
+    padding: 6px 12px !important;
+    margin: 0 !important;
+    background: #ffffff;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: var(--shadow-sm);
+}
+
+.pagination-btn:not(:disabled):hover {
+    background: var(--bg-color);
+    border-color: var(--border-hover);
+    color: var(--accent-purple);
+}
+
+.pagination-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+    background: var(--bg-color);
+}
+
+.pageInfo {
+    font-size: 0.85rem;
+    font-weight: 650;
+    color: var(--text-muted);
+    padding: 0 6px;
+    white-space: nowrap;
+}
 
 /* --- Responsive Media Queries --- */
 @media (max-width: 850px) {

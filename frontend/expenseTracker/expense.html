@@ -31,7 +31,7 @@
                 <nav class="tab-bar">
                     <button class="tab-btn active" data-tab="expenses">Expense Details</button>
                     <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
-                    <button class="tab-btn" data-tab="graphs">Graphs</button>
+                    <!-- <button class="tab-btn" data-tab="graphs">Graphs</button>-->
                     <button class="tab-btn" data-tab="reports">Reports</button>
                 </nav>
 
@@ -50,15 +50,41 @@
 
                             </tbody>
                         </table>
+                        <!-- Pagination Section -->
+                        <div class="pagination-container" >
+                            <button class="form-control pagination-btn firstPageBtn">First</button>
+                            <button class="form-control pagination-btn prevPageBtn">Previous</button>
+                            <span class="pageInfo">Page 1 of 1</span>
+                            <button class="form-control pagination-btn nextPageBtn">Next</button>
+                            <button class="form-control pagination-btn lastPageBtn">Last Page</button>
+                        </div>
                     </section>
                     <section id="leaderboard" class="tab-section">
                         <h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>
                         <p id="leaderboard-default">For leaderboard you have to subscribe first.</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Total Expenses</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leader-board-table"></tbody>
+                        </table>
+                        <div class="pagination-container" >
+                            <button class="form-control pagination-btn firstPageBtn">First</button>
+                            <button class="form-control pagination-btn prevPageBtn">Previous</button>
+                            <span class="pageInfo">Page 1 of 1</span>
+                            <button class="form-control pagination-btn nextPageBtn">Next</button>
+                            <button class="form-control pagination-btn lastPageBtn">Last Page</button>
+                        </div>
+
                     </section>
+                    <!--
                     <section id="graphs" class="tab-section">
                         <h3><i class="fa-solid fa-crown"></i> Graphs</h3>
                         <p id="graphs-default">For graphs you have to subscribe first.</p>
-                    </section>
+                    </section> -->
                     <section id="reports" class="tab-section">
                         <h3><i class="fa-solid fa-crown"></i> Report</h3>
                         <p id="report-default">For report you have to subscribe first.</p>

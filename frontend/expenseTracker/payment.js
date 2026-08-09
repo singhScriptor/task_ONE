@@ -98,42 +98,30 @@ async function verifyAndUpdateStatus() {
 //  Fetch and Display Leaderboard
 window.showLeaderboard = async function () {
     const leaderboardSection = document.getElementById("leaderboard");
-    if (!leaderboardSection) return;
+    const tbody = document.getElementById("leader-board-table");
+    if (!leaderboardSection || !tbody) return;
 
     try {
         const response = await axios.get(LEADERBOARD_URL, { withCredentials: true });
         const data = response.data;
 
+        // Hide default subscription text if present
+        const defaultText = document.getElementById("leaderboard-default");
+        if (defaultText) defaultText.style.display = "none";
+
+        // Clear existing rows
+        tbody.innerHTML = "";
+
         if (Array.isArray(data) && data.length > 0) {
-            // Clear existing content only for premium users
-            leaderboardSection.innerHTML = `<h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>`;
-
-            const table = document.createElement("table");
-            table.id = "leaderboardTable";
-            table.innerHTML = `
-                <thead>
-                    <tr>
-                        <th style="color:teal">Name</th>
-                        <th style="color:teal">Total Expenses</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            `;
-
-            const tbody = table.querySelector("tbody");
             data.forEach(user => {
                 const row = document.createElement("tr");
                 row.innerHTML = `<td>${user.name}</td><td>₹${user.total_expense || 0}</td>`;
                 tbody.appendChild(row);
             });
-
-            leaderboardSection.appendChild(table);
         } else {
-            // Premium but no data
-            leaderboardSection.innerHTML = `<h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>`;
-            const emptyMsg = document.createElement("p");
-            emptyMsg.textContent = "No leaderboard data available.";
-            leaderboardSection.appendChild(emptyMsg);
+            const row = document.createElement("tr");
+            row.innerHTML = `<td colspan="2" style="text-align:center;">No leaderboard data available.</td>`;
+            tbody.appendChild(row);
         }
     }
     catch (err) {

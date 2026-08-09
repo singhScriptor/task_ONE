@@ -9,8 +9,11 @@ if (form) {
     form.addEventListener('submit', addExpense);
 }
 
-// track budget in memory
+// Track budget and pagination in memory
 let currentBudget = 0;
+let currentPage = 1;
+const rowsPerPage = 10;
+let allExpenses = [];
 
 // add new expense
 async function addExpense(event) {
@@ -26,7 +29,10 @@ async function addExpense(event) {
         let result = await axios.post(EXPENSE_URL, details, { withCredentials: true });
         const expense = result.data;
 
-        addRow(expense);
+        allExpenses.push(expense);
+        currentPage = Math.ceil(allExpenses.length / rowsPerPage); // Jump to last page to see new entry
+        renderExpensesPage();
+
         if (form) form.reset();
 
         // refresh numbers
@@ -40,19 +46,60 @@ async function addExpense(event) {
     }
 }
 
-function addRow(expense) {
+// Render  10 Expenses in one page  & Update Pagination UI
+function renderExpensesPage() {
     let tableBody = document.getElementById('expense-table');
     if (!tableBody) return;
+    tableBody.innerHTML = '';
 
-    let row = document.createElement('tr');
-    row.id = `expense_row_${expense.id}`;
-    row.innerHTML = `
-        <td>${expense.price}</td>
-        <td>${expense.description}</td>
-        <td>${expense.category}</td>
-        <td><button onclick="deleteExpense(${expense.id})" style="border:none; cursor:pointer; background:none"><i class="fa fa-trash"></i></button></td>
-    `;
-    tableBody.appendChild(row);
+    let totalPages = parseInt(allExpenses.length / rowsPerPage);
+    if (allExpenses.length % rowsPerPage !== 0) {
+        totalPages = totalPages + 1;
+    }
+    if (totalPages < 1) {
+        totalPages = 1;
+    }
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+    if (currentPage < 1) {
+        currentPage = 1;
+    }
+
+    let start = (currentPage - 1) * rowsPerPage;
+    let end = start + rowsPerPage;
+    let pageItems = allExpenses.slice(start, end);
+
+    pageItems.forEach(expense => {
+        let row = document.createElement('tr');
+        row.id = `expense_row_${expense.id}`;
+        row.innerHTML = `
+            <td>${expense.price}</td>
+            <td>${expense.description}</td>
+            <td>${expense.category}</td>
+            <td><button onclick="deleteExpense(${expense.id})" style="border:none; cursor:pointer; background:none"><i class="fa fa-trash"></i></button></td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    // Updated expense section Pagination Controls
+    const expenseSection = document.getElementById('expenses');
+    if (expenseSection) {
+        let pageInfo = expenseSection.querySelector('.pageInfo');
+        let prevBtn = expenseSection.querySelector('.prevPageBtn');
+        let nextBtn = expenseSection.querySelector('.nextPageBtn');
+
+        if (pageInfo) {
+            pageInfo.innerText =
+                `Page ${currentPage} of ${totalPages}`;
+        }
+        if (prevBtn) {
+            prevBtn.disabled = (currentPage === 1);
+        }
+        if (nextBtn) {
+            nextBtn.disabled = (currentPage >= totalPages);
+        }
+    }
 }
 
 async function deleteExpense(id) {
@@ -60,7 +107,8 @@ async function deleteExpense(id) {
         let result = await axios.delete(`${EXPENSE_URL}/${id}`, { withCredentials: true });
 
         if (result) {
-            document.getElementById(`expense_row_${id}`)?.remove();
+            allExpenses = allExpenses.filter(item => item.id !== id);
+            renderExpensesPage();
             await updateDashboard();
 
             if (typeof window.showLeaderboard === 'function') {
@@ -81,7 +129,7 @@ async function updateDashboard() {
             axios.get(`${BUDGET_URL}/get-budget`, { withCredentials: true })
         ]);
 
-        const totalExpense = expenseRes.data.reduce((sum, item) => sum + parseFloat(item.price), 0);
+        const totalExpense = allExpenses.reduce((sum, item) => sum + parseFloat(item.price), 0);
         const budgetValue = parseFloat(budgetRes.data?.amount) || 0;
 
         currentBudget = budgetValue;
@@ -125,11 +173,11 @@ if (saveBudgetBtn) {
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const res = await axios.get(EXPENSE_URL, { withCredentials: true });
-        const tableBody = document.getElementById('expense-table');
-        if (tableBody) tableBody.innerHTML = '';
-
-        res.data.forEach(element => addRow(element));
+        allExpenses = res.data || [];
+        currentPage = 1;
+        renderExpensesPage();
         await updateDashboard();
+        await updateSummary();
     } catch (err) {
         console.error('Error while loading expenses:', err);
     }
@@ -148,9 +196,33 @@ async function updateSummary() {
     }
 }
 
-// fetch ai summary
-document.addEventListener('DOMContentLoaded', async () => {
-    await updateSummary();
+// Class-based Pagination
+document.addEventListener('click', (event) => {
+    const btn = event.target.closest('.pagination-btn');
+    if (!btn) return;
+
+    const section = btn.closest('.tab-section');
+    if (!section || section.id !== 'expenses') return;
+
+    let totalPages = parseInt(allExpenses.length / rowsPerPage);
+    if (allExpenses.length % rowsPerPage !== 0) {
+        totalPages = totalPages + 1;
+    }
+    if (totalPages < 1) {
+        totalPages = 1;
+    }
+
+    if (btn.classList.contains('firstPageBtn')) {
+        currentPage = 1;
+    } else if (btn.classList.contains('prevPageBtn') && currentPage > 1) {
+        currentPage--;
+    } else if (btn.classList.contains('nextPageBtn') && currentPage < totalPages) {
+        currentPage++;
+    } else if (btn.classList.contains('lastPageBtn')) {
+        currentPage = totalPages;
+    }
+
+    renderExpensesPage();
 });
 
 // logout handler
@@ -160,7 +232,6 @@ logoutBtn.id = "logoutBtn";
 
 logoutBtn.addEventListener("click", async () => {
     try {
-        // await axios.post("http://localhost:3000/api/logout", {}, { withCredentials: true });
         window.location.href = "../signin/signin.html";
     } catch (err) {
         console.error("Logout failed:", err.message);
