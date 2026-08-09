@@ -23,6 +23,7 @@ const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const premiumRoute = require('./routes/premiumRoutes');
 const generativeAiRoutes = require('./routes/genaiRoutes');
 const forgotRoutes = require('./routes/forgotRoutes')
+const paginationRoutes = require('./routes/paginationRoutes')
 
 
 // middleware & error handling
@@ -37,6 +38,7 @@ app.use('/api/budget', budgetRoutes);
 app.use('/api/premium', subscriptionRoutes);
 app.use('/api/premium', premiumRoute);
 app.use('/password',forgotRoutes)
+app.use('/api',paginationRoutes)
 
 
 
@@ -71,7 +73,7 @@ app.get('/', (req, res) => {
 // error handling middleware
 app.use(errorhandling);
 
-database.sync()
+database.sync({alter:true})
     .then(() => {
         app.listen(port, () => {
             console.log('Server is listening on port 3000...');
