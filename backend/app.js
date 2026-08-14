@@ -23,7 +23,8 @@ const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const premiumRoute = require('./routes/premiumRoutes');
 const generativeAiRoutes = require('./routes/genaiRoutes');
 const forgotRoutes = require('./routes/forgotRoutes')
-const paginationRoutes = require('./routes/paginationRoutes')
+const reportRoutes = require('./routes/reportRoutes')
+
 
 
 // middleware & error handling
@@ -38,7 +39,8 @@ app.use('/api/budget', budgetRoutes);
 app.use('/api/premium', subscriptionRoutes);
 app.use('/api/premium', premiumRoute);
 app.use('/password',forgotRoutes)
-app.use('/api',paginationRoutes)
+app.use('/api',reportRoutes)
+
 
 
 

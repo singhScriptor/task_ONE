@@ -33,10 +33,6 @@ const users = sequelize.define('users', {
     total_expense: {
         type: DataTypes.INTEGER,
         defaultValue: 0
-    },
-    rowsPerPage: {
-        type: DataTypes.INTEGER,
-        defaultValue: 10
     }
 },
     {
