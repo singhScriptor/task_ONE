@@ -6,7 +6,6 @@
     <title>Expense Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../expenseTracker/expense.css">
-
 </head>
 
 <body>
@@ -16,76 +15,102 @@
             <h1>Track Your Expenses</h1>
         </div>
         <div class="header-right">
-            <button type="button" id="premiumBtn"><i class="fa-solid fa-crown"></i> Subscribe</button>
+            <button type="button" id="premiumBtn" aria-label="Subscribe to Premium"><i class="fa-solid fa-crown"></i>
+                Subscribe</button>
         </div>
     </header>
+
     <div class="main-wrapper">
         <div class="left-column">
             <div class="summary">
-                <!-- put summary content here -->
                 <p>Total Summary goes here...</p>
             </div>
 
-
             <div class="left-panel">
-                <nav class="tab-bar">
-                    <button class="tab-btn active" data-tab="expenses">Expense Details</button>
-                    <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
-                    <!-- <button class="tab-btn" data-tab="graphs">Graphs</button>-->
-                    <button class="tab-btn" data-tab="reports">Reports</button>
+                <nav class="tab-bar" role="tablist">
+                    <button class="tab-btn active" data-tab="expenses" role="tab" aria-selected="true">Expense
+                        Details</button>
+                    <button class="tab-btn" data-tab="leaderboard" role="tab" aria-selected="false">Leaderboard</button>
+                    <button class="tab-btn" data-tab="reports" role="tab" aria-selected="false">Reports</button>
                 </nav>
 
                 <main id="tab-content">
-                    <section id="expenses" class="tab-section active">
+                    <!-- Inside #expenses section -->
+                    <section id="expenses" class="tab-section active" role="tabpanel">
+                        <!-- Header/Title or Container if needed -->
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Amount</th>
-                                    <th>Description</th>
-                                    <th>Category</th>
-                                    <th>Action</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="expense-table">
-
-                            </tbody>
+                            <tbody id="expense-table"></tbody>
                         </table>
-                        <!-- Pagination Section -->
-                        <div class="pagination-container" >
-                            <button class="form-control pagination-btn firstPageBtn">First</button>
-                            <button class="form-control pagination-btn prevPageBtn">Previous</button>
-                            <span class="pageInfo">Page 1 of 1</span>
-                            <button class="form-control pagination-btn nextPageBtn">Next</button>
-                            <button class="form-control pagination-btn lastPageBtn">Last Page</button>
+
+                        <div class="table-footer-container">
+                            <!-- Row selector dropdown moved here -->
+                            <select class="row-select form-control" aria-label="Select rows per page">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+
+                            <!-- Pagination Section -->
+                            <div class="pagination-container">
+                                <button class="form-control pagination-btn firstPageBtn"
+                                    aria-label="First Page">First</button>
+                                <button class="form-control pagination-btn prevPageBtn"
+                                    aria-label="Previous Page">Previous</button>
+                                <span class="pageInfo">Page 1 of 1</span>
+                                <button class="form-control pagination-btn nextPageBtn"
+                                    aria-label="Next Page">Next</button>
+                                <button class="form-control pagination-btn lastPageBtn" aria-label="Last Page">Last
+                                    Page</button>
+                            </div>
                         </div>
                     </section>
-                    <section id="leaderboard" class="tab-section">
+
+                    <!-- Inside #leaderboard section -->
+                    <section id="leaderboard" class="tab-section" role="tabpanel">
                         <h3><i class="fa-solid fa-crown"></i> Leaderboard</h3>
                         <p id="leaderboard-default">For leaderboard you have to subscribe first.</p>
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Total Expenses</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Total Expenses</th>
                                 </tr>
                             </thead>
                             <tbody id="leader-board-table"></tbody>
                         </table>
-                        <div class="pagination-container" >
-                            <button class="form-control pagination-btn firstPageBtn">First</button>
-                            <button class="form-control pagination-btn prevPageBtn">Previous</button>
-                            <span class="pageInfo">Page 1 of 1</span>
-                            <button class="form-control pagination-btn nextPageBtn">Next</button>
-                            <button class="form-control pagination-btn lastPageBtn">Last Page</button>
-                        </div>
 
+                        <div class="table-footer-container">
+                            <select class="row-select form-control" aria-label="Select rows per page">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+
+                            <div class="pagination-container">
+                                <button class="form-control pagination-btn firstPageBtn"
+                                    aria-label="First Page">First</button>
+                                <button class="form-control pagination-btn prevPageBtn"
+                                    aria-label="Previous Page">Previous</button>
+                                <span class="pageInfo">Page 1 of 1</span>
+                                <button class="form-control pagination-btn nextPageBtn"
+                                    aria-label="Next Page">Next</button>
+                                <button class="form-control pagination-btn lastPageBtn" aria-label="Last Page">Last
+                                    Page</button>
+                            </div>
+                        </div>
                     </section>
-                    <!--
-                    <section id="graphs" class="tab-section">
-                        <h3><i class="fa-solid fa-crown"></i> Graphs</h3>
-                        <p id="graphs-default">For graphs you have to subscribe first.</p>
-                    </section> -->
-                    <section id="reports" class="tab-section">
+
+                    <section id="reports" class="tab-section" role="tabpanel">
                         <h3><i class="fa-solid fa-crown"></i> Report</h3>
                         <p id="report-default">For report you have to subscribe first.</p>
 
@@ -99,10 +124,10 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Period</th>
-                                    <th>Income</th>
-                                    <th>Expense</th>
-                                    <th>Saving</th>
+                                    <th scope="col">Period</th>
+                                    <th scope="col">Income</th>
+                                    <th scope="col">Expense</th>
+                                    <th scope="col">Saving</th>
                                 </tr>
                             </thead>
                             <tbody id="report-table"></tbody>
@@ -127,8 +152,8 @@
                     <div>Balance: <span id="balance"></span></div>
                 </div>
             </div>
-            <div class="right-panel">
 
+            <div class="right-panel">
                 <div class="header-switcher">
                     <button id="expenseHeader" class="active-header" onclick="showSection('expense')">
                         Add Expense
@@ -137,14 +162,16 @@
                         Add Budget
                     </button>
                 </div>
+
                 <form id="form">
-                    <label for="amount">Amount</label>
+                    <label for="price">Amount</label>
                     <input type="number" class="form-control" id="price" required>
+
                     <label for="description">Description</label>
                     <textarea class="form-control" id="description" required></textarea>
+
                     <label for="category">Category</label>
                     <select class="form-control" id="category" required>
-
                         <option value="food">Food</option>
                         <option value="travel">Travel</option>
                         <option value="shopping">Shopping</option>
@@ -153,6 +180,7 @@
                         <option value="petrol">Petrol</option>
                         <option value="Other">Other</option>
                     </select>
+
                     <button type="submit" id="submit" class="form-control">Add Expense</button>
                 </form>
 
@@ -165,14 +193,12 @@
             </div>
         </div>
     </div>
+
     <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
     <script src="../expenseTracker/tabsSlides.js" defer></script>
     <script src="../expenseTracker/expense.js" defer></script>
     <script src="../expenseTracker/toggleform.js" defer></script>
-
     <script src="../expenseTracker/payment.js" defer></script>
     <script src="../expenseTracker/reportTabs.js" defer></script>
 

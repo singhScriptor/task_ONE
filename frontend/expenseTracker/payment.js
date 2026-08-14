@@ -1,26 +1,17 @@
-// Run status check on page load
-document.addEventListener("DOMContentLoaded",verifyAndUpdateStatus);
-
+document.addEventListener("DOMContentLoaded", verifyAndUpdateStatus);
 
 const cashfree = Cashfree({ mode: "sandbox" });
 const premiumBtn = document.getElementById("premiumBtn");
 
-// API Endpoints
 const p_URL = "http://localhost:3000/api/premium/payment";
 const V_URL = "http://localhost:3000/api/premium/verify";
 const STATUS_URL = "http://localhost:3000/api/premium/status";
 const LEADERBOARD_URL = "http://localhost:3000/api/premium/showLeaderboard";
+const REPORT_URL = "http://localhost:3000/api/reports/download";
 
-// Payment Initiation
 if (premiumBtn) {
     premiumBtn.addEventListener("click", async () => {
         try {
-            /*
-            {} empty curl for nothing in the body,
-            here axios.post expect(url,data,config)
-            so {} is acting as a placeholder even if
-            we don't send data
-            */
             const response = await axios.post(p_URL, {}, { withCredentials: true });
             const data = response.data;
 
@@ -39,13 +30,12 @@ if (premiumBtn) {
     });
 }
 
-// Global Function: Update Premium UI
 window.updatePremiumUI = function () {
     const pBtn = document.getElementById("premiumBtn");
 
     if (pBtn) {
         const parent = pBtn.parentElement;
-        pBtn.remove(); // Removes Subscribe button
+        pBtn.remove();
 
         if (!document.getElementById("prime-header")) {
             const header = document.createElement("h4");
@@ -56,19 +46,12 @@ window.updatePremiumUI = function () {
             header.style.fontSize = "1rem";
             header.innerHTML = `<i class="fa-solid fa-crown" style="color: #ffd700;"></i> You are a prime member now`;
 
-            if (parent) {
-                parent.appendChild(header);
-            }
+            if (parent) parent.appendChild(header);
         }
     }
-    // remove default graph placeholder when premium is active
     const graphDefault = document.getElementById("graphs-default");
-    if (graphDefault) {
-        graphDefault.remove();
-    }
+    if (graphDefault) graphDefault.remove();
 };
-
-// Verification & Status Check Flow Handles Page Load
 
 async function verifyAndUpdateStatus() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -81,66 +64,94 @@ async function verifyAndUpdateStatus() {
         }
 
         const res = await axios.get(STATUS_URL, { withCredentials: true });
+
         if (res.data?.isPremiumUser === true) {
             window.updatePremiumUI();
-            window.showLeaderboard();// only call if premium
-            window.showReport()
+            window.showLeaderboard();
+            window.showReport();
         } else {
-            // Not premium → leave default <p> intact
-            console.log("User is not premium, showing default placeholders.");
+            // --- Non-Premium State ---
+
+            // 1. Leaderboard: Show default message, hide table and footer
+            const leaderboardDefault = document.getElementById("leaderboard-default");
+            if (leaderboardDefault) leaderboardDefault.style.display = "block";
+
+            const leaderboardTable = document.querySelector("#leaderboard table");
+            if (leaderboardTable) leaderboardTable.style.display = "none";
+
+            const leaderboardFooter = document.querySelector("#leaderboard .table-footer-container");
+            if (leaderboardFooter) leaderboardFooter.style.display = "none";
+
+            // 2. Report: Show default warning paragraph, hide switcher, table, and download button
+            const reportDefault = document.getElementById("report-default");
+            if (reportDefault) reportDefault.style.display = "block";
+
+            const reportSwitcher = document.getElementById("report-switcher");
+            if (reportSwitcher) reportSwitcher.style.display = "none";
+
+            // Fixed ID from #report to #reports to match your CSS
+            const reportTable = document.querySelector("#reports table");
+            if (reportTable) reportTable.style.display = "none";
+
+            const downloadBtn = document.getElementById("downloadReportBtn");
+            if (downloadBtn) downloadBtn.style.display = "none";
         }
     } catch (err) {
-        console.error("Verification/Status error:", err);
+        console.error("Status error:", err);
     }
 }
 
-
-//  Fetch and Display Leaderboard
 window.showLeaderboard = async function () {
     const leaderboardSection = document.getElementById("leaderboard");
-    const tbody = document.getElementById("leader-board-table");
-    if (!leaderboardSection || !tbody) return;
+    if (!leaderboardSection) return;
 
     try {
         const response = await axios.get(LEADERBOARD_URL, { withCredentials: true });
         const data = response.data;
 
-        // Hide default subscription text if present
         const defaultText = document.getElementById("leaderboard-default");
         if (defaultText) defaultText.style.display = "none";
 
-        // Clear existing rows
-        tbody.innerHTML = "";
+        const leaderboardTable = document.querySelector("#leaderboard table");
+        if (leaderboardTable) leaderboardTable.style.display = "table";
+
+        const leaderboardFooter = document.querySelector("#leaderboard .table-footer-container");
+        if (leaderboardFooter) leaderboardFooter.style.display = "flex";
 
         if (Array.isArray(data) && data.length > 0) {
-            data.forEach(user => {
-                const row = document.createElement("tr");
-                row.innerHTML = `<td>${user.name}</td><td>₹${user.total_expense || 0}</td>`;
-                tbody.appendChild(row);
-            });
+            const formattedData = data.map(user => ({
+                name: user.name,
+                totalExpenses: user.total_expense || 0
+            }));
+
+            if (typeof window.setLeaderboardData === 'function') {
+                window.setLeaderboardData(formattedData);
+            }
         } else {
-            const row = document.createElement("tr");
-            row.innerHTML = `<td colspan="2" style="text-align:center;">No leaderboard data available.</td>`;
-            tbody.appendChild(row);
+            const tbody = document.getElementById("leader-board-table");
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;">No leaderboard data available.</td></tr>`;
+            }
         }
-    }
-    catch (err) {
+    } catch (err) {
         console.error("Leaderboard error:", err);
     }
 };
 
-// display Expense Reports
 window.showReport = async function () {
     const reportDefault = document.getElementById("report-default");
-    const reportTableBody = document.getElementById("report-table");
+    const reportSwitcher = document.getElementById("report-switcher");
+    const reportTable = document.querySelector("#reports table");
     const downloadBtn = document.getElementById("downloadReportBtn");
 
     try {
         if (reportDefault) reportDefault.style.display = "none";
 
-        const parentTable = reportTableBody ? reportTableBody.closest("table") : null;
-        if (parentTable) {
-            parentTable.classList.add("active-report"); // Unlocks and displays properly across all screens
+        if (reportSwitcher) reportSwitcher.style.display = "flex";
+
+        if (reportTable) {
+            reportTable.style.display = "table";
+            reportTable.classList.add("active-report");
         }
 
         if (downloadBtn) {
@@ -150,7 +161,32 @@ window.showReport = async function () {
             downloadBtn.style.cursor = "pointer";
         }
     } catch (err) {
-        console.error("Report loading error:", err);
+        console.error("Report error:", err);
     }
 };
 
+async function downloadReport() {
+    try {
+        const response = await axios.get(REPORT_URL, {
+            withCredentials: true,
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'expense-report.csv');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    } catch (err) {
+        console.log("Download failed:", err.message);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const downloadBtn = document.getElementById("downloadReportBtn");
+    if (downloadBtn) {
+        downloadBtn.addEventListener("click", downloadReport);
+    }
+});

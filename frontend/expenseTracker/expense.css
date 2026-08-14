@@ -29,8 +29,6 @@
     min-width: 0;
 }
 
-
-
 body {
     background-color: var(--bg-color);
     color: var(--text-dark);
@@ -76,6 +74,14 @@ body {
     font-size: 0.85rem;
     cursor: pointer;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition-fast);
+}
+
+#premiumBtn:hover {
+    background: rgba(255, 255, 255, 0.28);
 }
 
 
@@ -166,7 +172,7 @@ body {
     right: 10px;
     background: transparent;
     border: none;
-    color: white;
+    color: var(--text-muted);
     font-size: 1.25rem;
     cursor: pointer;
     padding: 6px;
@@ -186,15 +192,14 @@ body {
     cursor: not-allowed;
     opacity: 0.5;
 }
+
 /* --- Floating Logout Button --- */
 #logoutBtn {
     position: fixed;
     bottom: 12px;
     left: 12px;
     right: auto;
-    /* Fixes the horizontal stretching */
     width: auto;
-    /* Shrinks the button to fit its content */
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -303,6 +308,12 @@ body {
     color: var(--text-muted);
     border-radius: var(--radius-sm);
     white-space: nowrap;
+    transition: var(--transition-fast);
+}
+
+.tab-btn:hover {
+    color: var(--text-dark);
+    background: var(--bg-color);
 }
 
 .tab-btn.active {
@@ -319,8 +330,6 @@ body {
 }
 
 #tab-content {
-    /*max-height: 380px;
-    overflow-y: auto;*/
     scrollbar-width: none;
     padding-bottom: 0.5rem;
 }
@@ -373,6 +382,7 @@ td {
     border-radius: 9999px;
     cursor: pointer;
     white-space: nowrap;
+    transition: var(--transition-fast);
 }
 
 .header-switcher .active-header {
@@ -404,6 +414,18 @@ label {
     border-radius: var(--radius-md);
     background-color: #ffffff;
     font-size: 0.85rem;
+    transition: var(--transition-fast);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
 }
 
 #submit,
@@ -418,6 +440,12 @@ label {
     font-size: 0.9rem;
     cursor: pointer;
     width: 100%;
+    transition: var(--transition-fast);
+}
+
+#submit:hover,
+#saveBudgetBtn:hover {
+    opacity: 0.92;
 }
 
 .deleteBtn {
@@ -429,13 +457,18 @@ label {
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.deleteBtn:hover {
+    background: #fee2e2;
 }
 
 #leaderboard h3 .fa-crown {
     color: var(--accent-purple);
 }
 
-/* --- Pagination   --- */
+/* --- Pagination --- */
 .pagination-container {
     display: flex;
     justify-content: center;
@@ -484,7 +517,35 @@ label {
     white-space: nowrap;
 }
 
-/* --- Responsive Media Queries --- */
+/* --- Tab Section Positioning --- */
+#expenses,
+#leaderboard {
+    position: relative;
+    padding-top: 2.75rem; /* Creates space at the top for the dropdown */
+}
+
+/* --- Row Selector Positioned at Top Right --- */
+#expenses .row-select,
+#leaderboard .row-select {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px; /* Compact width for row count */
+    padding: 6px 10px;
+    margin-bottom: 0;
+    font-size: 0.8rem;
+    background-color: var(--card-bg);
+}
+
+/* Optional wrapper for bottom controls if needed */
+.table-footer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* --- Responsive Media Queries (Untouched) --- */
 @media (max-width: 850px) {
     .main-wrapper {
         grid-template-columns: 1fr;
@@ -492,7 +553,6 @@ label {
 }
 
 @media (max-width: 450px) {
-    /* Force tables to take full width of container cleanly */
     table {
         width: 100% !important;
         display: table !important;
@@ -513,7 +573,6 @@ label {
         font-size: 0.7rem !important;
     }
 
-    /* Tabs stack vertically */
     .tab-bar {
         flex-direction: column;
         gap: 6px;
@@ -524,7 +583,6 @@ label {
         text-align: center;
     }
 
-    /* Header adjustments */
     #main-header {
         flex-direction: column;
         text-align: center;

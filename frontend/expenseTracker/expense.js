@@ -1,241 +1,335 @@
-// backend api endpoints
 const BASE_URL = 'http://localhost:3000/api';
 const EXPENSE_URL = `${BASE_URL}/expenses`;
 const BUDGET_URL = `${BASE_URL}/budget`;
-const summary_URL = `${BASE_URL}/expenses/ai`;
+const SUMMARY_URL = `${BASE_URL}/expenses/ai`;
 
 const form = document.getElementById('form');
-if (form) {
-    form.addEventListener('submit', addExpense);
-}
+if (form) form.addEventListener('submit', addExpense);
 
-// Track budget and pagination in memory
 let currentBudget = 0;
-let currentPage = 1;
-const rowsPerPage = 10;
+let currentExpensePage = parseInt(localStorage.getItem('expense_currentPage')) || 1;
+let currentLeaderPage = parseInt(localStorage.getItem('leader_currentPage')) || 1;
+let rowsPerPage = parseInt(localStorage.getItem('expense_rowsPerPage')) || 10;
+
 let allExpenses = [];
+let allLeaderboardData = [];
 
-// add new expense
-async function addExpense(event) {
-    event.preventDefault();
+document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('row-select')) {
+        rowsPerPage = parseInt(e.target.value) || 10;
+        currentExpensePage = 1;
+        currentLeaderPage = 1;
 
+        localStorage.setItem('expense_rowsPerPage', rowsPerPage);
+        localStorage.setItem('expense_currentPage', currentExpensePage);
+        localStorage.setItem('leader_currentPage', currentLeaderPage);
+
+        renderExpensesPage();
+        if (typeof renderLeaderboardPage === 'function'){
+            renderLeaderboardPage();
+        }
+    }
+});
+
+async function addExpense(e) {
+    e.preventDefault();
     try {
-        const details = {
+        const payload = {
             price: document.getElementById('price').value,
             description: document.getElementById('description').value,
             category: document.getElementById('category').value
         };
 
-        let result = await axios.post(EXPENSE_URL, details, { withCredentials: true });
-        const expense = result.data;
+        const res = await axios.post(EXPENSE_URL, payload,
+            { withCredentials: true }
+        );
+        allExpenses.push(res.data);
 
-        allExpenses.push(expense);
-        currentPage = Math.ceil(allExpenses.length / rowsPerPage); // Jump to last page to see new entry
+        const rem = allExpenses.length % rowsPerPage;
+        currentExpensePage = rem > 0 ? (allExpenses.length - rem) / rowsPerPage + 1 : (allExpenses.length - rem) / rowsPerPage;
+        if (currentExpensePage < 1) currentExpensePage = 1;
+
+        localStorage.setItem('expense_currentPage', currentExpensePage);
         renderExpensesPage();
 
-        if (form) form.reset();
-
-        // refresh numbers
+        if (form){
+            form.reset();
+        }
         await updateDashboard();
 
-        if (typeof window.showLeaderboard === 'function') {
+        if (typeof window.showLeaderboard === 'function'){
             window.showLeaderboard();
         }
     } catch (err) {
-        console.error("Add expense error:", err.message);
+        console.log("Error adding expense:", err.message);
     }
 }
 
-// Render  10 Expenses in one page  & Update Pagination UI
 function renderExpensesPage() {
-    let tableBody = document.getElementById('expense-table');
-    if (!tableBody) return;
-    tableBody.innerHTML = '';
+    const tbody = document.getElementById('expense-table');
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
-    let totalPages = parseInt(allExpenses.length / rowsPerPage);
-    if (allExpenses.length % rowsPerPage !== 0) {
-        totalPages = totalPages + 1;
-    }
-    if (totalPages < 1) {
+    const rem = allExpenses.length % rowsPerPage;
+    let totalPages = rem > 0 ? (allExpenses.length - rem) / rowsPerPage + 1 : (allExpenses.length - rem) / rowsPerPage;
+    if (totalPages < 1){
         totalPages = 1;
     }
-    if (currentPage > totalPages) {
-        currentPage = totalPages;
+
+    if (currentExpensePage > totalPages){
+        currentExpensePage = totalPages;
     }
-    if (currentPage < 1) {
-        currentPage = 1;
+    if (currentExpensePage < 1){
+        currentExpensePage = 1;
     }
 
-    let start = (currentPage - 1) * rowsPerPage;
-    let end = start + rowsPerPage;
-    let pageItems = allExpenses.slice(start, end);
+    localStorage.setItem('expense_currentPage', currentExpensePage);
 
-    pageItems.forEach(expense => {
-        let row = document.createElement('tr');
-        row.id = `expense_row_${expense.id}`;
-        row.innerHTML = `
-            <td>${expense.price}</td>
-            <td>${expense.description}</td>
-            <td>${expense.category}</td>
-            <td><button onclick="deleteExpense(${expense.id})" style="border:none; cursor:pointer; background:none"><i class="fa fa-trash"></i></button></td>
+    const start = (currentExpensePage - 1) * rowsPerPage;
+    const pageItems = allExpenses.slice(start, start + rowsPerPage);
+
+    pageItems.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.id = `expense_row_${item.id}`;
+        tr.innerHTML = `
+            <td>${item.price}</td>
+            <td>${item.description}</td>
+            <td>${item.category}</td>
+            <td><button onclick="deleteExpense(${item.id})" style="border:none; cursor:pointer; background:none"><i class="fa fa-trash"></i></button></td>
         `;
-        tableBody.appendChild(row);
+        tbody.appendChild(tr);
     });
 
-    // Updated expense section Pagination Controls
-    const expenseSection = document.getElementById('expenses');
-    if (expenseSection) {
-        let pageInfo = expenseSection.querySelector('.pageInfo');
-        let prevBtn = expenseSection.querySelector('.prevPageBtn');
-        let nextBtn = expenseSection.querySelector('.nextPageBtn');
+    const section = document.getElementById('expenses');
+    if (section) {
+        const info = section.querySelector('.pageInfo');
+        const prev = section.querySelector('.prevPageBtn');
+        const next = section.querySelector('.nextPageBtn');
 
-        if (pageInfo) {
-            pageInfo.innerText =
-                `Page ${currentPage} of ${totalPages}`;
+        if (info) {
+            info.innerText = `Page ${currentExpensePage} of ${totalPages}`;
         }
-        if (prevBtn) {
-            prevBtn.disabled = (currentPage === 1);
+        if (prev) {
+            prev.disabled = currentExpensePage === 1;
         }
-        if (nextBtn) {
-            nextBtn.disabled = (currentPage >= totalPages);
+        if (next) {
+            next.disabled = currentExpensePage >= totalPages;
+        }
+
+        const select = section.querySelector('.row-select');
+        if (select) {
+            select.value = rowsPerPage;
         }
     }
 }
+
+function renderLeaderboardPage() {
+    const tbody = document.getElementById('leader-board-table');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const rem = allLeaderboardData.length % rowsPerPage;
+    let totalPages = rem > 0 ? (allLeaderboardData.length - rem) / rowsPerPage + 1 : (allLeaderboardData.length - rem) / rowsPerPage;
+    if (totalPages < 1) totalPages = 1;
+
+    if (currentLeaderPage > totalPages) {
+        currentLeaderPage = totalPages;
+    }
+    if (currentLeaderPage < 1) {
+        currentLeaderPage = 1;
+    }
+
+    localStorage.setItem('leader_currentPage', currentLeaderPage);
+
+    const start = (currentLeaderPage - 1) * rowsPerPage;
+    const pageItems = allLeaderboardData.slice(start, start + rowsPerPage);
+
+    pageItems.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${item.name}</td><td>₹${item.totalExpenses}</td>`;
+        tbody.appendChild(tr);
+    });
+
+    const section = document.getElementById('leaderboard');
+    if (section) {
+        const info = section.querySelector('.pageInfo');
+        const prev = section.querySelector('.prevPageBtn');
+        const next = section.querySelector('.nextPageBtn');
+
+        if (info) {
+            info.innerText = `Page ${currentLeaderPage} of ${totalPages}`;
+        }
+        if (prev) {
+            prev.disabled = currentLeaderPage === 1;
+        }
+        if (next) {
+            next.disabled = currentLeaderPage >= totalPages;
+        }
+
+        const select = section.querySelector('.row-select');
+        if (select) {
+            select.value = rowsPerPage;
+        }
+    }
+}
+
+window.renderLeaderboardPage = renderLeaderboardPage;
+window.setLeaderboardData = (data) => {
+    allLeaderboardData = data || [];
+    renderLeaderboardPage();
+};
 
 async function deleteExpense(id) {
     try {
-        let result = await axios.delete(`${EXPENSE_URL}/${id}`, { withCredentials: true });
-
-        if (result) {
+        const res = await axios.delete(`${EXPENSE_URL}/${id}`, { withCredentials: true });
+        if (res) {
             allExpenses = allExpenses.filter(item => item.id !== id);
+
+            const rem = allExpenses.length % rowsPerPage;
+            let totalPages = rem > 0 ? (allExpenses.length - rem) / rowsPerPage + 1 : (allExpenses.length - rem) / rowsPerPage;
+            if (totalPages < 1) totalPages = 1;
+
+            if (currentExpensePage > totalPages) {
+                currentExpensePage = totalPages;
+            }
+
             renderExpensesPage();
             await updateDashboard();
 
             if (typeof window.showLeaderboard === 'function') {
                 window.showLeaderboard();
             }
-        } else {
-            alert('Failed to delete expense');
         }
     } catch (err) {
-        console.error("Delete expense error:", err.message);
+        console.log("Delete error:", err.message);
     }
 }
 
 async function updateDashboard() {
     try {
-        const [expenseRes, budgetRes] = await Promise.all([
+        const [expRes, budRes] = await Promise.all([
             axios.get(EXPENSE_URL, { withCredentials: true }),
             axios.get(`${BUDGET_URL}/get-budget`, { withCredentials: true })
         ]);
 
-        const totalExpense = allExpenses.reduce((sum, item) => sum + parseFloat(item.price), 0);
-        const budgetValue = parseFloat(budgetRes.data?.amount) || 0;
+        allExpenses = expRes.data || [];
+        const totalExp = allExpenses.reduce((acc, curr) => acc + Number(curr.price || 0), 0);
+        const budgetVal = parseFloat(budRes.data?.amount) || 0;
 
-        currentBudget = budgetValue;
+        currentBudget = budgetVal;
 
-        const budgetEl = document.getElementById('budget');
-        const expenseEl = document.getElementById('expense');
-        const balanceEl = document.getElementById('balance');
+        const bEl = document.getElementById('budget');
+        const eEl = document.getElementById('expense');
+        const balEl = document.getElementById('balance');
 
-        if (budgetEl) budgetEl.innerText = `₹${budgetValue}`;
-        if (expenseEl) expenseEl.innerText = `₹${totalExpense}`;
-        if (balanceEl) balanceEl.innerText = `₹${budgetValue - totalExpense}`;
+        if (bEl) {
+            bEl.innerText = `₹${budgetVal}`;
+        }
+        if (eEl) {
+            eEl.innerText = `₹${totalExp}`;
+        }
+        if (balEl) {
+            balEl.innerText = `₹${budgetVal - totalExp}`;
+        }
     } catch (err) {
-        console.error("Dashboard update failed:", err);
+        console.log("Dashboard error:", err);
     }
 }
 
-// set or edit user budget
-const saveBudgetBtn = document.getElementById('saveBudgetBtn');
-if (saveBudgetBtn) {
-    saveBudgetBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const val = document.getElementById('budgetInput').value;
-
-        if (!val || val <= 0) {
-            alert('Please enter a valid budget amount');
-            return;
-        }
-
-        try {
-            await axios.post(`${BUDGET_URL}/add-budget`, { amount: val }, { withCredentials: true });
-            await updateDashboard();
-
-            showSection('expense');
-        } catch (err) {
-            console.error('Failed to save budget:', err);
-        }
-    });
-}
-
-// load initial data on page load
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const res = await axios.get(EXPENSE_URL, { withCredentials: true });
         allExpenses = res.data || [];
-        currentPage = 1;
+
+        const activeTab = localStorage.getItem('active_tab');
+        if (activeTab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.getAttribute('data-tab') === activeTab) btn.click();
+            });
+        }
+
         renderExpensesPage();
         await updateDashboard();
         await updateSummary();
     } catch (err) {
-        console.error('Error while loading expenses:', err);
+        console.log("Load error:", err);
+    }
+});
+
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab-btn');
+    if (btn && btn.getAttribute('data-tab')) {
+        localStorage.setItem('active_tab', btn.getAttribute('data-tab'));
     }
 });
 
 async function updateSummary() {
     try {
-        const res = await axios.get(`${summary_URL}/summary`, { withCredentials: true });
-        const summaryEl = document.querySelector('.summary');
-
-        if (summaryEl && res.data.summary) {
-            summaryEl.innerHTML = `<p>${res.data.summary}</p>`;
+        const res = await axios.get(`${SUMMARY_URL}/summary`, { withCredentials: true });
+        const summaryBox = document.querySelector('.summary');
+        if (summaryBox && res.data.summary) {
+            summaryBox.innerHTML = `<p>${res.data.summary}</p>`;
         }
     } catch (err) {
-        console.error("Failed to load summary:", err.message);
+        console.log("Summary error:", err.message);
     }
 }
 
-// Class-based Pagination
-document.addEventListener('click', (event) => {
-    const btn = event.target.closest('.pagination-btn');
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.pagination-btn');
     if (!btn) return;
 
     const section = btn.closest('.tab-section');
-    if (!section || section.id !== 'expenses') return;
+    if (!section) return;
 
-    let totalPages = parseInt(allExpenses.length / rowsPerPage);
-    if (allExpenses.length % rowsPerPage !== 0) {
-        totalPages = totalPages + 1;
-    }
-    if (totalPages < 1) {
-        totalPages = 1;
-    }
+    if (section.id === 'expenses') {
+        const rem = allExpenses.length % rowsPerPage;
+        let totalPages = rem > 0 ? (allExpenses.length - rem) / rowsPerPage + 1 : (allExpenses.length - rem) / rowsPerPage;
+        if (totalPages < 1) totalPages = 1;
 
-    if (btn.classList.contains('firstPageBtn')) {
-        currentPage = 1;
-    } else if (btn.classList.contains('prevPageBtn') && currentPage > 1) {
-        currentPage--;
-    } else if (btn.classList.contains('nextPageBtn') && currentPage < totalPages) {
-        currentPage++;
-    } else if (btn.classList.contains('lastPageBtn')) {
-        currentPage = totalPages;
-    }
+        if (btn.classList.contains('firstPageBtn')) {
+            currentExpensePage = 1;
+        }
+        else if (btn.classList.contains('prevPageBtn') && currentExpensePage > 1) {
+            currentExpensePage--;
+        }
+        else if (btn.classList.contains('nextPageBtn') && currentExpensePage < totalPages) {
+            currentExpensePage++;
+        }
+        else if (btn.classList.contains('lastPageBtn')) {
+            currentExpensePage = totalPages;
+        }
 
-    renderExpensesPage();
+        localStorage.setItem('expense_currentPage', currentExpensePage);
+        renderExpensesPage();
+    } else if (section.id === 'leaderboard') {
+        const rem = allLeaderboardData.length % rowsPerPage;
+        let totalPages = rem > 0 ? (allLeaderboardData.length - rem) / rowsPerPage + 1 : (allLeaderboardData.length - rem) / rowsPerPage;
+        if (totalPages < 1) totalPages = 1;
+
+        if (btn.classList.contains('firstPageBtn')) {
+            currentLeaderPage = 1;
+        }
+        else if (btn.classList.contains('prevPageBtn') && currentLeaderPage > 1) {
+            currentLeaderPage--;
+        }
+        else if (btn.classList.contains('nextPageBtn') && currentLeaderPage < totalPages) {
+            currentLeaderPage++;
+        }
+        else if (btn.classList.contains('lastPageBtn')) {
+            currentLeaderPage = totalPages;
+        }
+
+        localStorage.setItem('leader_currentPage', currentLeaderPage);
+        renderLeaderboardPage();
+    }
 });
 
-// logout handler
 const logoutBtn = document.createElement("button");
 logoutBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
 logoutBtn.id = "logoutBtn";
-
-logoutBtn.addEventListener("click", async () => {
-    try {
-        window.location.href = "../signin/signin.html";
-    } catch (err) {
-        console.error("Logout failed:", err.message);
-    }
+logoutBtn.addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "../signin/signin.html";
 });
-
 document.body.appendChild(logoutBtn);
