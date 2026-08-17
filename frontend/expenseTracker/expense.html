@@ -109,10 +109,11 @@
                             </div>
                         </div>
                     </section>
-
                     <section id="reports" class="tab-section" role="tabpanel">
-                        <h3><i class="fa-solid fa-crown"></i> Report</h3>
-                        <p id="report-default">For report you have to subscribe first.</p>
+                        <div class="report-header-banner">
+                            <h3><i class="fa-solid fa-crown"></i> Report</h3>
+                            <p id="report-default">For report you have to subscribe first.</p>
+                        </div>
 
                         <!-- Sub-switcher Toggle Buttons -->
                         <div class="header-switcher" id="report-switcher">
@@ -121,20 +122,48 @@
                             <button data-report="yearly">Yearly</button>
                         </div>
 
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th scope="col">Period</th>
-                                    <th scope="col">Income</th>
-                                    <th scope="col">Expense</th>
-                                    <th scope="col">Saving</th>
-                                </tr>
-                            </thead>
-                            <tbody id="report-table"></tbody>
-                        </table>
+                        <!-- Dynamic Filter Selector -->
+                        <div class="report-filter-bar">
+                            <label id="selector-label" for="reportDateInput">Select Date:</label>
+                            <input type="date" id="reportDateInput" class="form-control">
+                        </div>
 
-                        <!-- download button -->
-                        <button id="downloadReportBtn" style="display: none;" disabled title="Download Expenses File">
+                        <!-- Summary Cards -->
+                        <div class="report-summary-cards">
+                            <div class="card">
+                                <h4>Total Expenses</h4>
+                                <p id="total-expense-metric">₹0.00</p>
+                            </div>
+                            <div class="card">
+                                <h4>Total Income</h4>
+                                <p id="total-income-metric">₹0.00</p>
+                            </div>
+                            <div class="card">
+                                <h4>Net Savings</h4>
+                                <p id="net-savings-metric">₹0.00</p>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Period & Transaction Breakdown Table -->
+                        <div class="table-container">
+                            <div class="table-title-bar">
+                                <h4 id="report-table-title">Daily Breakdown</h4>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col" id="period-col-header">Date</th>
+                                        <th scope="col">Income</th>
+                                        <th scope="col">Expense</th>
+                                        <th scope="col">Saving</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-table"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Floating Download Report Button -->
+                        <button id="downloadReportBtn" disabled title="Download Expenses File">
                             <i class="fa-solid fa-download"></i>
                         </button>
                     </section>
@@ -199,8 +228,8 @@
     <script src="../expenseTracker/tabsSlides.js" defer></script>
     <script src="../expenseTracker/expense.js" defer></script>
     <script src="../expenseTracker/toggleform.js" defer></script>
+    <script src="../expenseTracker/budgets.js" defer></script>
     <script src="../expenseTracker/payment.js" defer></script>
-    <script src="../expenseTracker/reportTabs.js" defer></script>
 
 </body>
 

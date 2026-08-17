@@ -1,335 +1,412 @@
-const BASE_URL = 'http://localhost:3000/api';
-const EXPENSE_URL = `${BASE_URL}/expenses`;
-const BUDGET_URL = `${BASE_URL}/budget`;
-const SUMMARY_URL = `${BASE_URL}/expenses/ai`;
+const baseUrl = 'http://localhost:3000/api';
+const expenseApiUrl = `${baseUrl}/expenses`;
+const budgetApiUrl = `${baseUrl}/budget`;
+const summaryApiUrl = `${baseUrl}/expenses/ai`;
 
-const form = document.getElementById('form');
-if (form) form.addEventListener('submit', addExpense);
 
-let currentBudget = 0;
-let currentExpensePage = parseInt(localStorage.getItem('expense_currentPage')) || 1;
-let currentLeaderPage = parseInt(localStorage.getItem('leader_currentPage')) || 1;
-let rowsPerPage = parseInt(localStorage.getItem('expense_rowsPerPage')) || 10;
+let userCurrentBudget = 0;
 
-let allExpenses = [];
-let allLeaderboardData = [];
+const expenseFormElement = document.getElementById('form');
+if (expenseFormElement) {
+    expenseFormElement.addEventListener('submit', addExpenseToDatabase);
+}
 
-document.addEventListener('change', (e) => {
-    if (e.target.classList.contains('row-select')) {
-        rowsPerPage = parseInt(e.target.value) || 10;
-        currentExpensePage = 1;
-        currentLeaderPage = 1;
 
-        localStorage.setItem('expense_rowsPerPage', rowsPerPage);
-        localStorage.setItem('expense_currentPage', currentExpensePage);
-        localStorage.setItem('leader_currentPage', currentLeaderPage);
+let currentExpensePageNumber = parseInt(localStorage.getItem('expense_currentPage')) || 1;
+let currentLeaderboardPageNumber = parseInt(localStorage.getItem('leader_currentPage')) || 1;
+let itemsPerRowLimit = parseInt(localStorage.getItem('expense_rowsPerPage')) || 10;
+
+let allUserExpensesList = [];
+let allLeaderboardRecordsList = [];
+
+// Listen for row selector dropdown changes to change pagination limits
+document.addEventListener('change', function(event) {
+    if (event.target.classList.contains('row-select')) {
+        itemsPerRowLimit = parseInt(event.target.value) || 10;
+        currentExpensePageNumber = 1;
+        currentLeaderboardPageNumber = 1;
+
+        localStorage.setItem('expense_rowsPerPage', itemsPerRowLimit);
+        localStorage.setItem('expense_currentPage', currentExpensePageNumber);
+        localStorage.setItem('leader_currentPage', currentLeaderboardPageNumber);
 
         renderExpensesPage();
-        if (typeof renderLeaderboardPage === 'function'){
+        if (typeof renderLeaderboardPage === 'function') {
             renderLeaderboardPage();
         }
     }
 });
 
-async function addExpense(e) {
-    e.preventDefault();
+// Add new expense function
+async function addExpenseToDatabase(event) {
+    event.preventDefault();
     try {
-        const payload = {
+        let expensePayload = {
             price: document.getElementById('price').value,
             description: document.getElementById('description').value,
             category: document.getElementById('category').value
         };
 
-        const res = await axios.post(EXPENSE_URL, payload,
-            { withCredentials: true }
-        );
-        allExpenses.push(res.data);
+        let response = await axios.post(expenseApiUrl, expensePayload, { withCredentials: true });
+        allUserExpensesList.push(response.data);
 
-        const rem = allExpenses.length % rowsPerPage;
-        currentExpensePage = rem > 0 ? (allExpenses.length - rem) / rowsPerPage + 1 : (allExpenses.length - rem) / rowsPerPage;
-        if (currentExpensePage < 1) currentExpensePage = 1;
+        let remainder = allUserExpensesList.length % itemsPerRowLimit;
+        if (remainder > 0) {
+            currentExpensePageNumber = Math.floor(allUserExpensesList.length / itemsPerRowLimit) + 1;
+        } else {
+            currentExpensePageNumber = allUserExpensesList.length / itemsPerRowLimit;
+        }
 
-        localStorage.setItem('expense_currentPage', currentExpensePage);
+        if (currentExpensePageNumber < 1) {
+            currentExpensePageNumber = 1;
+        }
+
+        localStorage.setItem('expense_currentPage', currentExpensePageNumber);
         renderExpensesPage();
 
-        if (form){
-            form.reset();
+        if (expenseFormElement) {
+            expenseFormElement.reset();
         }
-        await updateDashboard();
 
-        if (typeof window.showLeaderboard === 'function'){
+        await updateDashboardMetrics();
+
+        // Instantly update the report table and numbers without refreshing the page
+        if (typeof window.updateReportView === 'function') {
+            let activeReportType = localStorage.getItem("savedReportType") || "daily";
+            window.updateReportView(activeReportType);
+        }
+
+        if (typeof window.showLeaderboard === 'function') {
             window.showLeaderboard();
         }
-    } catch (err) {
-        console.log("Error adding expense:", err.message);
+    } catch (error) {
+        console.log("Error adding expense:", error.message);
     }
 }
 
+// Render the expense table rows for the current page
 function renderExpensesPage() {
-    const tbody = document.getElementById('expense-table');
-    if (!tbody) return;
-    tbody.innerHTML = '';
+    let tableBody = document.getElementById('expense-table');
+    if (!tableBody) {
+        return;
+    }
+    tableBody.innerHTML = '';
 
-    const rem = allExpenses.length % rowsPerPage;
-    let totalPages = rem > 0 ? (allExpenses.length - rem) / rowsPerPage + 1 : (allExpenses.length - rem) / rowsPerPage;
-    if (totalPages < 1){
-        totalPages = 1;
+    let remainder = allUserExpensesList.length % itemsPerRowLimit;
+    let totalPagesCount = remainder > 0 ? Math.floor(allUserExpensesList.length / itemsPerRowLimit) + 1 : allUserExpensesList.length / itemsPerRowLimit;
+
+    if (totalPagesCount < 1) {
+        totalPagesCount = 1;
     }
 
-    if (currentExpensePage > totalPages){
-        currentExpensePage = totalPages;
+    if (currentExpensePageNumber > totalPagesCount) {
+        currentExpensePageNumber = totalPagesCount;
     }
-    if (currentExpensePage < 1){
-        currentExpensePage = 1;
+    if (currentExpensePageNumber < 1) {
+        currentExpensePageNumber = 1;
     }
 
-    localStorage.setItem('expense_currentPage', currentExpensePage);
+    localStorage.setItem('expense_currentPage', currentExpensePageNumber);
 
-    const start = (currentExpensePage - 1) * rowsPerPage;
-    const pageItems = allExpenses.slice(start, start + rowsPerPage);
+    let startIndex = (currentExpensePageNumber - 1) * itemsPerRowLimit;
+    let paginatedExpenses = allUserExpensesList.slice(startIndex, startIndex + itemsPerRowLimit);
 
-    pageItems.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.id = `expense_row_${item.id}`;
-        tr.innerHTML = `
-            <td>${item.price}</td>
-            <td>${item.description}</td>
-            <td>${item.category}</td>
-            <td><button onclick="deleteExpense(${item.id})" style="border:none; cursor:pointer; background:none"><i class="fa fa-trash"></i></button></td>
+    paginatedExpenses.forEach(function(singleExpense) {
+        let tableRow = document.createElement('tr');
+        tableRow.id = `expense_row_${singleExpense.id}`;
+        tableRow.innerHTML = `
+            <td>${singleExpense.price}</td>
+            <td>${singleExpense.description}</td>
+            <td>${singleExpense.category}</td>
+            <td><button onclick="deleteExpenseFromDatabase(${singleExpense.id})" style="border:none; cursor:pointer; background:none"><i class="fa fa-trash"></i></button></td>
         `;
-        tbody.appendChild(tr);
+        tableBody.appendChild(tableRow);
     });
 
-    const section = document.getElementById('expenses');
-    if (section) {
-        const info = section.querySelector('.pageInfo');
-        const prev = section.querySelector('.prevPageBtn');
-        const next = section.querySelector('.nextPageBtn');
+    let expensesSection = document.getElementById('expenses');
+    if (expensesSection) {
+        let pageInfoDisplay = expensesSection.querySelector('.pageInfo');
+        let previousButton = expensesSection.querySelector('.prevPageBtn');
+        let nextButton = expensesSection.querySelector('.nextPageBtn');
 
-        if (info) {
-            info.innerText = `Page ${currentExpensePage} of ${totalPages}`;
+        if (pageInfoDisplay) {
+            pageInfoDisplay.innerText = `Page ${currentExpensePageNumber} of ${totalPagesCount}`;
         }
-        if (prev) {
-            prev.disabled = currentExpensePage === 1;
+        if (previousButton) {
+            previousButton.disabled = currentExpensePageNumber === 1;
         }
-        if (next) {
-            next.disabled = currentExpensePage >= totalPages;
+        if (nextButton) {
+            nextButton.disabled = currentExpensePageNumber >= totalPagesCount;
         }
 
-        const select = section.querySelector('.row-select');
-        if (select) {
-            select.value = rowsPerPage;
+        let rowSelectDropdown = expensesSection.querySelector('.row-select');
+        if (rowSelectDropdown) {
+            rowSelectDropdown.value = itemsPerRowLimit;
         }
     }
 }
 
+// Render leaderboard table rows with pagination
 function renderLeaderboardPage() {
-    const tbody = document.getElementById('leader-board-table');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    const rem = allLeaderboardData.length % rowsPerPage;
-    let totalPages = rem > 0 ? (allLeaderboardData.length - rem) / rowsPerPage + 1 : (allLeaderboardData.length - rem) / rowsPerPage;
-    if (totalPages < 1) totalPages = 1;
-
-    if (currentLeaderPage > totalPages) {
-        currentLeaderPage = totalPages;
+    let leaderboardTableBody = document.getElementById('leader-board-table');
+    if (!leaderboardTableBody) {
+        return;
     }
-    if (currentLeaderPage < 1) {
-        currentLeaderPage = 1;
+    leaderboardTableBody.innerHTML = '';
+
+    let remainder = allLeaderboardRecordsList.length % itemsPerRowLimit;
+    let totalLeaderPages = remainder > 0 ? Math.floor(allLeaderboardRecordsList.length / itemsPerRowLimit) + 1 : allLeaderboardRecordsList.length / itemsPerRowLimit;
+
+    if (totalLeaderPages < 1) {
+        totalLeaderPages = 1;
     }
 
-    localStorage.setItem('leader_currentPage', currentLeaderPage);
+    if (currentLeaderboardPageNumber > totalLeaderPages) {
+        currentLeaderboardPageNumber = totalLeaderPages;
+    }
+    if (currentLeaderboardPageNumber < 1) {
+        currentLeaderboardPageNumber = 1;
+    }
 
-    const start = (currentLeaderPage - 1) * rowsPerPage;
-    const pageItems = allLeaderboardData.slice(start, start + rowsPerPage);
+    localStorage.setItem('leader_currentPage', currentLeaderboardPageNumber);
 
-    pageItems.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${item.name}</td><td>₹${item.totalExpenses}</td>`;
-        tbody.appendChild(tr);
+    let startIndex = (currentLeaderboardPageNumber - 1) * itemsPerRowLimit;
+    let paginatedLeaderboard = allLeaderboardRecordsList.slice(startIndex, startIndex + itemsPerRowLimit);
+
+    paginatedLeaderboard.forEach(function(leaderRecord) {
+        let tableRow = document.createElement('tr');
+        tableRow.innerHTML = `<td>${leaderRecord.name}</td><td>₹${leaderRecord.totalExpenses}</td>`;
+        leaderboardTableBody.appendChild(tableRow);
     });
 
-    const section = document.getElementById('leaderboard');
-    if (section) {
-        const info = section.querySelector('.pageInfo');
-        const prev = section.querySelector('.prevPageBtn');
-        const next = section.querySelector('.nextPageBtn');
+    let leaderboardSection = document.getElementById('leaderboard');
+    if (leaderboardSection) {
+        let pageInfoDisplay = leaderboardSection.querySelector('.pageInfo');
+        let previousButton = leaderboardSection.querySelector('.prevPageBtn');
+        let nextButton = leaderboardSection.querySelector('.nextPageBtn');
 
-        if (info) {
-            info.innerText = `Page ${currentLeaderPage} of ${totalPages}`;
+        if (pageInfoDisplay) {
+            pageInfoDisplay.innerText = `Page ${currentLeaderboardPageNumber} of ${totalLeaderPages}`;
         }
-        if (prev) {
-            prev.disabled = currentLeaderPage === 1;
+        if (previousButton) {
+            previousButton.disabled = currentLeaderboardPageNumber === 1;
         }
-        if (next) {
-            next.disabled = currentLeaderPage >= totalPages;
+        if (nextButton) {
+            nextButton.disabled = currentLeaderboardPageNumber >= totalLeaderPages;
         }
 
-        const select = section.querySelector('.row-select');
-        if (select) {
-            select.value = rowsPerPage;
+        let rowSelectDropdown = leaderboardSection.querySelector('.row-select');
+        if (rowSelectDropdown) {
+            rowSelectDropdown.value = itemsPerRowLimit;
         }
     }
 }
 
 window.renderLeaderboardPage = renderLeaderboardPage;
-window.setLeaderboardData = (data) => {
-    allLeaderboardData = data || [];
+window.setLeaderboardData = function(data) {
+    allLeaderboardRecordsList = data || [];
     renderLeaderboardPage();
 };
 
-async function deleteExpense(id) {
+// Delete expense function
+async function deleteExpenseFromDatabase(expenseId) {
     try {
-        const res = await axios.delete(`${EXPENSE_URL}/${id}`, { withCredentials: true });
-        if (res) {
-            allExpenses = allExpenses.filter(item => item.id !== id);
+        let deleteResponse = await axios.delete(`${expenseApiUrl}/${expenseId}`, { withCredentials: true });
+        if (deleteResponse) {
+            allUserExpensesList = allUserExpensesList.filter(function(item) {
+                return item.id !== expenseId;
+            });
 
-            const rem = allExpenses.length % rowsPerPage;
-            let totalPages = rem > 0 ? (allExpenses.length - rem) / rowsPerPage + 1 : (allExpenses.length - rem) / rowsPerPage;
-            if (totalPages < 1) totalPages = 1;
+            let remainder = allUserExpensesList.length % itemsPerRowLimit;
+            let totalPagesCount = remainder > 0 ? Math.floor(allUserExpensesList.length / itemsPerRowLimit) + 1 : allUserExpensesList.length / itemsPerRowLimit;
 
-            if (currentExpensePage > totalPages) {
-                currentExpensePage = totalPages;
+            if (totalPagesCount < 1) {
+                totalPagesCount = 1;
+            }
+
+            if (currentExpensePageNumber > totalPagesCount) {
+                currentExpensePageNumber = totalPagesCount;
             }
 
             renderExpensesPage();
-            await updateDashboard();
+            await updateDashboardMetrics();
+
+            // Instantly update the report table and numbers when an expense is deleted
+            if (typeof window.updateReportView === 'function') {
+                let activeReportType = localStorage.getItem("savedReportType") || "daily";
+                window.updateReportView(activeReportType);
+            }
 
             if (typeof window.showLeaderboard === 'function') {
                 window.showLeaderboard();
             }
         }
-    } catch (err) {
-        console.log("Delete error:", err.message);
+    } catch (error) {
+        console.log("Delete error:", error.message);
     }
 }
 
-async function updateDashboard() {
+// Recalculate and display budget, total expenses, and balance
+
+async function updateDashboardMetrics() {
     try {
-        const [expRes, budRes] = await Promise.all([
-            axios.get(EXPENSE_URL, { withCredentials: true }),
-            axios.get(`${BUDGET_URL}/get-budget`, { withCredentials: true })
+        let responsesArray = await Promise.all([
+            axios.get(expenseApiUrl, { withCredentials: true }),
+            axios.get(`${budgetApiUrl}/get-budget`, { withCredentials: true })
         ]);
 
-        allExpenses = expRes.data || [];
-        const totalExp = allExpenses.reduce((acc, curr) => acc + Number(curr.price || 0), 0);
-        const budgetVal = parseFloat(budRes.data?.amount) || 0;
+        allUserExpensesList = responsesArray[0].data || [];
 
-        currentBudget = budgetVal;
+        let calculatedTotalExpenses = allUserExpensesList.reduce(function(accumulator, currentItem) {
+            return accumulator + Number(currentItem.price || 0);
+        }, 0);
 
-        const bEl = document.getElementById('budget');
-        const eEl = document.getElementById('expense');
-        const balEl = document.getElementById('balance');
+        let retrievedBudgetAmount = parseFloat(responsesArray[1].data?.amount) || 0;
+        userCurrentBudget = retrievedBudgetAmount;
 
-        if (bEl) {
-            bEl.innerText = `₹${budgetVal}`;
+        // DOM Elements for Metrics
+        let budgetDisplayElement = document.getElementById('budget');
+        let expenseDisplayElement = document.getElementById('expense');
+        let balanceDisplayElement = document.getElementById('balance');
+        let totalIncomeDisplayElement = document.getElementById('total-income'); // Target your Income Box
+
+        if (budgetDisplayElement) {
+            budgetDisplayElement.innerText = `₹${retrievedBudgetAmount}`;
         }
-        if (eEl) {
-            eEl.innerText = `₹${totalExp}`;
+        if (expenseDisplayElement) {
+            expenseDisplayElement.innerText = `₹${calculatedTotalExpenses}`;
         }
-        if (balEl) {
-            balEl.innerText = `₹${budgetVal - totalExp}`;
+        if (balanceDisplayElement) {
+            balanceDisplayElement.innerText = `₹${retrievedBudgetAmount - calculatedTotalExpenses}`;
         }
-    } catch (err) {
-        console.log("Dashboard error:", err);
+
+        // Use userCurrentBudget as Total Income so they match and update instantly
+        if (totalIncomeDisplayElement) {
+            totalIncomeDisplayElement.innerText = `₹${userCurrentBudget}`;
+        }
+
+        // Instantly update the report table and summary view without needing a page refresh
+        if (typeof window.updateReportView === 'function') {
+            let activeReportType = localStorage.getItem("savedReportType") || "daily";
+            window.updateReportView(activeReportType);
+        }
+
+    } catch (error) {
+        console.log("Dashboard error:", error);
     }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+// Initial page load event
+document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const res = await axios.get(EXPENSE_URL, { withCredentials: true });
-        allExpenses = res.data || [];
+        let expensesResponse = await axios.get(expenseApiUrl, { withCredentials: true });
+        allUserExpensesList = expensesResponse.data || [];
 
-        const activeTab = localStorage.getItem('active_tab');
-        if (activeTab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                if (btn.getAttribute('data-tab') === activeTab) btn.click();
+        let activeTabName = localStorage.getItem('active_tab');
+        if (activeTabName) {
+            document.querySelectorAll('.tab-btn').forEach(function(button) {
+                if (button.getAttribute('data-tab') === activeTabName) {
+                    button.click();
+                }
             });
         }
 
         renderExpensesPage();
-        await updateDashboard();
-        await updateSummary();
-    } catch (err) {
-        console.log("Load error:", err);
+        await updateDashboardMetrics();
+        await updateAiSummary();
+    } catch (error) {
+        console.log("Load error:", error);
     }
 });
 
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.tab-btn');
-    if (btn && btn.getAttribute('data-tab')) {
-        localStorage.setItem('active_tab', btn.getAttribute('data-tab'));
+// Save active tab preference
+document.addEventListener('click', function(event) {
+    let tabButton = event.target.closest('.tab-btn');
+    if (tabButton && tabButton.getAttribute('data-tab')) {
+        localStorage.setItem('active_tab', tabButton.getAttribute('data-tab'));
     }
 });
 
-async function updateSummary() {
+// Fetch Gen-AI summary
+async function updateAiSummary() {
     try {
-        const res = await axios.get(`${SUMMARY_URL}/summary`, { withCredentials: true });
-        const summaryBox = document.querySelector('.summary');
-        if (summaryBox && res.data.summary) {
-            summaryBox.innerHTML = `<p>${res.data.summary}</p>`;
+        let summaryResponse = await axios.get(`${summaryApiUrl}/summary`, { withCredentials: true });
+        let summaryBoxElement = document.querySelector('.summary');
+        if (summaryBoxElement && summaryResponse.data.summary) {
+            summaryBoxElement.innerHTML = `<p>${summaryResponse.data.summary}</p>`;
         }
-    } catch (err) {
-        console.log("Summary error:", err.message);
+    } catch (error) {
+        console.log("Summary error:", error.message);
     }
 }
 
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.pagination-btn');
-    if (!btn) return;
+// Handle pagination button clicks
+document.addEventListener('click', function(event) {
+    let clickedButton = event.target.closest('.pagination-btn');
+    if (!clickedButton) {
+        return;
+    }
 
-    const section = btn.closest('.tab-section');
-    if (!section) return;
+    let parentSection = clickedButton.closest('.tab-section');
+    if (!parentSection) {
+        return;
+    }
 
-    if (section.id === 'expenses') {
-        const rem = allExpenses.length % rowsPerPage;
-        let totalPages = rem > 0 ? (allExpenses.length - rem) / rowsPerPage + 1 : (allExpenses.length - rem) / rowsPerPage;
-        if (totalPages < 1) totalPages = 1;
+    if (parentSection.id === 'expenses') {
+        let remainder = allUserExpensesList.length % itemsPerRowLimit;
+        let totalPagesCount = remainder > 0 ? Math.floor(allUserExpensesList.length / itemsPerRowLimit) + 1 : allUserExpensesList.length / itemsPerRowLimit;
 
-        if (btn.classList.contains('firstPageBtn')) {
-            currentExpensePage = 1;
-        }
-        else if (btn.classList.contains('prevPageBtn') && currentExpensePage > 1) {
-            currentExpensePage--;
-        }
-        else if (btn.classList.contains('nextPageBtn') && currentExpensePage < totalPages) {
-            currentExpensePage++;
-        }
-        else if (btn.classList.contains('lastPageBtn')) {
-            currentExpensePage = totalPages;
+        if (totalPagesCount < 1) {
+            totalPagesCount = 1;
         }
 
-        localStorage.setItem('expense_currentPage', currentExpensePage);
+        if (clickedButton.classList.contains('firstPageBtn')) {
+            currentExpensePageNumber = 1;
+        }
+         else if (clickedButton.classList.contains('prevPageBtn') && currentExpensePageNumber > 1) {
+            currentExpensePageNumber--;
+        }
+        else if (clickedButton.classList.contains('nextPageBtn') && currentExpensePageNumber < totalPagesCount) {
+            currentExpensePageNumber++;
+        }
+        else if (clickedButton.classList.contains('lastPageBtn')) {
+            currentExpensePageNumber = totalPagesCount;
+        }
+
+        localStorage.setItem('expense_currentPage', currentExpensePageNumber);
         renderExpensesPage();
-    } else if (section.id === 'leaderboard') {
-        const rem = allLeaderboardData.length % rowsPerPage;
-        let totalPages = rem > 0 ? (allLeaderboardData.length - rem) / rowsPerPage + 1 : (allLeaderboardData.length - rem) / rowsPerPage;
-        if (totalPages < 1) totalPages = 1;
+    } else if (parentSection.id === 'leaderboard') {
+        let remainder = allLeaderboardRecordsList.length % itemsPerRowLimit;
+        let totalPagesCount = remainder > 0 ? Math.floor(allLeaderboardRecordsList.length / itemsPerRowLimit) + 1 : allLeaderboardRecordsList.length / itemsPerRowLimit;
 
-        if (btn.classList.contains('firstPageBtn')) {
-            currentLeaderPage = 1;
-        }
-        else if (btn.classList.contains('prevPageBtn') && currentLeaderPage > 1) {
-            currentLeaderPage--;
-        }
-        else if (btn.classList.contains('nextPageBtn') && currentLeaderPage < totalPages) {
-            currentLeaderPage++;
-        }
-        else if (btn.classList.contains('lastPageBtn')) {
-            currentLeaderPage = totalPages;
+        if (totalPagesCount < 1) {
+            totalPagesCount = 1;
         }
 
-        localStorage.setItem('leader_currentPage', currentLeaderPage);
+        if (clickedButton.classList.contains('firstPageBtn')) {
+            currentLeaderboardPageNumber = 1;
+        }
+        else if (clickedButton.classList.contains('prevPageBtn') && currentLeaderboardPageNumber > 1) {
+            currentLeaderboardPageNumber--;
+        }
+        else if (clickedButton.classList.contains('nextPageBtn') && currentLeaderboardPageNumber < totalPagesCount) {
+            currentLeaderboardPageNumber++;
+        }
+        else if (clickedButton.classList.contains('lastPageBtn')) {
+            currentLeaderboardPageNumber = totalPagesCount;
+        }
+
+        localStorage.setItem('leader_currentPage', currentLeaderboardPageNumber);
         renderLeaderboardPage();
     }
 });
 
-const logoutBtn = document.createElement("button");
-logoutBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
-logoutBtn.id = "logoutBtn";
-logoutBtn.addEventListener("click", () => {
+// Logout feature setup
+let userLogoutButton = document.createElement("button");
+userLogoutButton.innerHTML = `<i class="fas fa-sign-out-alt"></i>`;
+userLogoutButton.id = "logoutBtn";
+userLogoutButton.addEventListener("click", function() {
     localStorage.clear();
     window.location.href = "../signin/signin.html";
 });
-document.body.appendChild(logoutBtn);
+document.body.appendChild(userLogoutButton);

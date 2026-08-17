@@ -21,11 +21,13 @@ function showSection(section) {
         expenseForm.style.display = 'none';
         budgetForm.style.display = 'block';
 
-        // Update both the Tab Header and the Form Submit Button
-        if (typeof currentBudget !== 'undefined' && currentBudget > 0) {
-            budgetInput.value = currentBudget;
-            budgetBtn.innerText = 'Edit Budget';       // Updates tab header text
-            saveBudgetBtn.innerText = 'Update Budget'; // Updates form submit button text
+        // FIX: Check userCurrentBudget from expense.js or check if input already has a value
+        let activeBudgetAmount = typeof userCurrentBudget !== 'undefined' ? userCurrentBudget : parseFloat(budgetInput.value);
+
+        if (activeBudgetAmount > 0) {
+            budgetInput.value = activeBudgetAmount;
+            budgetBtn.innerText = 'Edit Budget';
+            saveBudgetBtn.innerText = 'Update Budget';
         } else {
             budgetInput.value = '';
             budgetBtn.innerText = 'Add Budget';
@@ -41,6 +43,7 @@ function showSection(section) {
         expenseBtn.style.border = '1px solid var(--border-color)';
     }
 }
+
 document.addEventListener('DOMContentLoaded', () => {
-    showSection('expense'); // ✅ ensures Add Expense form is visible
+    showSection('expense');
 });
