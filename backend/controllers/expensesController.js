@@ -1,13 +1,15 @@
+const { NotBeforeError } = require('jsonwebtoken')
 const expenseService = require('../services/expensesServices')
 
 exports.addExpenses = async(req,res,next)=>{
     try{
-        const {price,description,category} = req.body
+        const {price,description,category,note} = req.body
         const userId = req.user.id
         const result = await expenseService.createExpense({
             price,
             description,
-            category
+            category,
+            note
         },userId)
         res.status(201).json(result)
     }

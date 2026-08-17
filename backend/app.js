@@ -75,8 +75,9 @@ app.get('/', (req, res) => {
 // error handling middleware
 app.use(errorhandling);
 
-database.sync()
+database.authenticate()
     .then(() => {
+        console.log('Database connected successfully.');
         app.listen(port, () => {
             console.log('Server is listening on port 3000...');
         });

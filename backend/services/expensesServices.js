@@ -7,11 +7,16 @@ exports.createExpense = async (data, userId) => {
     const t = await sequelize.transaction();
 
     try {
+
+        const currentDate = new Date().toISOString().split('T')[0];
+        
         const result = await expenses.create({
             price: data.price,
             description: data.description,
             category: data.category,
-            userId: userId
+            note: data.note,
+            userId: userId,
+            date:data.date || currentDate
         }, { transaction: t });
 
         await User.increment('total_expense', {
@@ -97,6 +102,7 @@ exports.updateExpenseByIdAndUserId = async (id, userId, data) => {
         exp.price = newPrice;
         exp.description = data.description;
         exp.category = data.category;
+        exp.note = data.note;
         await exp.save({ transaction: t });
 
         const diff = newPrice - oldPrice;
