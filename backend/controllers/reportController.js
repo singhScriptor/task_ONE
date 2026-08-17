@@ -1,20 +1,36 @@
 const reportService = require('../services/reportServices');
 
+exports.getReportDataJson = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const reportType = req.query.reportType || 'daily';
+        const selectedDate = req.query.date; // Grab the date from query string
+
+        // Pass selectedDate to the service
+        const reportSummaryData = await reportService.getFilteredExpenses(userId, reportType, selectedDate);
+        res.status(200).json(reportSummaryData);
+    } catch (err) {
+        err.statusCode = 500;
+        next(err);
+    }
+};
+
 exports.downloadReport = async (req, res, next) => {
     try {
-        // req.user.id comes directly from your authentication middleware
         const userId = req.user.id;
+        const reportType = req.query.reportType || 'daily';
+        const selectedDate = req.query.date; // Grab the date from query string
 
-        const expenses = await reportService.getUserExpenses(userId);
+        const reportSummaryData = await reportService.getFilteredExpenses(userId, reportType, selectedDate);
 
-        let csv = 'ID,Price,Description,Category\n';
-        expenses.forEach(exp => {
-            csv += `${exp.id},${exp.price},"${exp.description}",${exp.category}\n`;
+        let csvContent = 'Period,Income,Expense,Savings\n';
+        reportSummaryData.rows.forEach(row => {
+            csvContent += `${row.period},${row.income},${row.expense},${row.saving}\n`;
         });
 
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename=my-expenses-report.csv');
-        res.status(200).send(csv);
+        res.setHeader('Content-Disposition', `attachment; filename=expense_report_${reportType}.csv`);
+        res.status(200).send(csvContent);
     } catch (err) {
         err.statusCode = 500;
         next(err);

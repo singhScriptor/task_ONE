@@ -31,7 +31,7 @@ const summarizeExpenses = async (expenses) => {
 
         const interaction = await ai.interactions.create({
             model: "gemini-3.6-flash",
-            input: `Summarize these expenses in plain text (under 3 sentences, no markdown/lists). Highlight the top category, overspending area, and one saving tip: ${JSON.stringify(cleanExpenses)}`,
+            input: `Summarize these expenses in plain text (under 3 sentences, no markdown/lists).Use the Indian Rupee symbol (₹) for all monetary values instead of any other currency symbol. Highlight the top category, overspending area, and one saving tip: ${JSON.stringify(cleanExpenses)}`,
         });
 
         return interaction.output_text || "No summary generated.";

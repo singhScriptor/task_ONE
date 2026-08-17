@@ -20,13 +20,22 @@ const expenses = sequelize.define('expenses',{
         type:DataTypes.STRING,
         allowNull:false
     },
+    type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'expense'
+    },
+    date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
+    },
     userId:{
         type:DataTypes.INTEGER,
         allowNull:false
     }
 },
     {
-        timestamps:false,
+        timestamps:true,
         tableName:'expenses'
     }
 )
