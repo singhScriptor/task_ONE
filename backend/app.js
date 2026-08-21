@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT
 
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
@@ -79,7 +79,7 @@ database.authenticate()
     .then(() => {
         console.log('Database connected successfully.');
         app.listen(port, () => {
-            console.log('Server is listening on port 3000...');
+            console.log('Server is listening ...');
         });
     })
     .catch((err) => {
