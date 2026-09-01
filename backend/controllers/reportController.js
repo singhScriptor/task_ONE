@@ -17,6 +17,12 @@ exports.getReportDataJson = async (req, res, next) => {
 
 exports.downloadReport = async (req, res, next) => {
     try {
+
+        //check user is premium or not
+        if (!req.user || !req.user.ispremiumuser) {
+            return res.status(401).json({ message: 'Unauthorized - Premium membership required' });
+        }
+
         const userId = req.user.id;
         const reportType = req.query.reportType || 'daily';
         const selectedDate = req.query.date; // Grab the date from query string

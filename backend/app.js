@@ -5,14 +5,19 @@ const path = require('path');
 const cors = require('cors');
 const database = require('./config/db-connection');
 const cookieParser = require('cookie-parser');
+const compression = require('compression')
+const morgan = require('morgan')
 
 
 const app = express();
-const port = process.env.PORT
+const port = process.env.PORT || 3000
 
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());
+app.use(compression())
+app.use(morgan('dev'))
+
 
 // accessing routes files
 const signupRoutes = require('./routes/signupRoutes');
