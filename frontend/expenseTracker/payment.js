@@ -12,7 +12,7 @@ const REPORT_DOWNLOAD_API_URL = "http://localhost:3000/api/reports/download";
 const BUDGET_API_URL = "http://localhost:3000/api/budget";
 
 if (premiumButton) {
-    premiumButton.addEventListener("click", async function() {
+    premiumButton.addEventListener("click", async function () {
         try {
             let apiResponse = await axios.post(PAYMENT_API_URL, {}, { withCredentials: true });
             let paymentInfo = apiResponse.data;
@@ -32,7 +32,7 @@ if (premiumButton) {
     });
 }
 
-window.updatePremiumUI = function() {
+window.updatePremiumUI = function () {
     let upgradeButton = document.getElementById("premiumBtn");
 
     if (upgradeButton) {
@@ -132,7 +132,7 @@ async function verifyAndUpdateMembershipStatus() {
     }
 }
 
-window.showLeaderboard = async function() {
+window.showLeaderboard = async function () {
     let leaderboardSectionBox = document.getElementById("leaderboard");
     if (!leaderboardSectionBox) {
         return;
@@ -158,7 +158,7 @@ window.showLeaderboard = async function() {
         }
 
         if (Array.isArray(leaderboardUsers) && leaderboardUsers.length > 0) {
-            let formattedUsers = leaderboardUsers.map(function(user) {
+            let formattedUsers = leaderboardUsers.map(function (user) {
                 return {
                     name: user.name,
                     totalExpenses: user.total_expense || 0
@@ -179,7 +179,7 @@ window.showLeaderboard = async function() {
     }
 };
 
-window.showReport = async function() {
+window.showReport = async function () {
     let reportDefaultNotice = document.getElementById("report-default");
     let reportSwitcherBar = document.getElementById("report-switcher");
     let reportFilterSection = document.querySelector(".report-filter-bar");
@@ -256,7 +256,7 @@ function initializeReportFeatures() {
     function applyReportTypeUI(reportType) {
         if (reportSwitcherBar) {
             let switchButtons = reportSwitcherBar.querySelectorAll("button");
-            switchButtons.forEach(function(button) {
+            switchButtons.forEach(function (button) {
                 if (button.getAttribute("data-report") === reportType) {
                     button.classList.add("active-header");
                 }
@@ -330,18 +330,18 @@ function initializeReportFeatures() {
     }
 
     if (dateInputField) {
-        dateInputField.oninput = function() {
+        dateInputField.oninput = function () {
             updateReportView(activeReportType);
         };
-        dateInputField.onchange = function() {
+        dateInputField.onchange = function () {
             updateReportView(activeReportType);
         };
     }
 
     if (reportSwitcherBar) {
         let switchButtons = reportSwitcherBar.querySelectorAll("button");
-        switchButtons.forEach(function(button) {
-            button.onclick = async function(event) {
+        switchButtons.forEach(function (button) {
+            button.onclick = async function (event) {
                 let clickedButton = event.currentTarget;
                 activeReportType = clickedButton.getAttribute("data-report");
                 localStorage.setItem("savedReportType", activeReportType);
@@ -397,14 +397,34 @@ function initializeReportFeatures() {
         }
     }
 
-    if (downloadReportBtn) {
-        downloadReportBtn.onclick = function() {
-            window.location.href = `${REPORT_DOWNLOAD_API_URL}?reportType=${activeReportType}`;
-        };
-    }
-
     updateReportView(activeReportType);
 
     // EXPOSE GLOBALLY SO EXPENSE.JS CAN TRIGGER IT INSTANTLY ON ADD/DELETE
     window.updateReportView = updateReportView;
 }
+
+
+// Download report event
+document.addEventListener("click", function (event) {
+    if (event.target.closest("#downloadReportBtn")) {
+        let activeTab = document.querySelector("#report-switcher .active-header").getAttribute("data-report");
+        let selectedDate = document.getElementById("reportDateInput").value;
+
+        // Use the defined constant or strip the domain to fix the 401 cross-origin cookie issue
+        axios.get(`${REPORT_DOWNLOAD_API_URL}?reportType=${activeTab}&date=${selectedDate}`, {
+            withCredentials: true,
+            responseType: 'blob'
+        })
+        .then(function (response) {
+            let blob = new Blob([response.data], { type: 'text/csv' });
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `report-${activeTab}.csv`;
+            link.click();
+        })
+        .catch(function (error) {
+            console.error("Download error:", error);
+            alert("Failed to download report.");
+        });
+    }
+});
