@@ -1,13 +1,14 @@
 const { Sequelize } = require("sequelize");
 
 const sequelize = new Sequelize(
-    'expense_tracker',
-    'root',
-    process.env.LOCALHOST_PASSWORD,
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+
     {
-        host:'localhost',
-        dialect:'mysql',
-        logging:false
+        host: process.env.DB_HOST,
+        dialect: process.env.DIALECT || 'mysql',
+        logging: false
     }
 );
 
