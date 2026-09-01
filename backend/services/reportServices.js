@@ -3,17 +3,18 @@ const User = require('../models/users');
 const Budget = require('../models/budget');
 
 exports.getFilteredExpenses = async function (userId, reportType, selectedDate) {
-    // 1. Check if the user exists
+    // Check if the user exists
     const foundUser = await User.findByPk(userId);
     if (!foundUser) {
         throw new Error("User not found");
     }
 
-    // 2. Fetch the user's budget from the budget table
+    // Fetch the user's budget from the budget table
     const userBudgetRecord = await Budget.findOne({ where: { userId: userId } });
+
     const userBudgetAmount = userBudgetRecord && userBudgetRecord.amount ? Number(userBudgetRecord.amount) : 0;
 
-    // 3. Fetch all expenses for this user
+    //  Fetch all expenses for this user
     const allUserExpenses = await Expense.findAll({
         where: { userId: userId },
         order: [['date', 'DESC']]
@@ -23,7 +24,7 @@ exports.getFilteredExpenses = async function (userId, reportType, selectedDate) 
     let finalTotalIncome = 0;
     let finalTotalExpense = 0;
 
-    // 4. Loop through expenses to group them by date, month, or year
+    // Loop through expenses to group them by date, month, or year
     allUserExpenses.forEach(function (singleExpense) {
         let transactionDate = new Date(singleExpense.date || singleExpense.createdAt);
         if (isNaN(transactionDate)) {
@@ -31,13 +32,18 @@ exports.getFilteredExpenses = async function (userId, reportType, selectedDate) 
         }
 
         let fullDateString = transactionDate.toISOString().split('T')[0];
+
         let yearMonthString = fullDateString.slice(0, 7);
+
         let yearString = transactionDate.getFullYear().toString();
 
         let groupingKey = fullDateString;
         if (reportType === 'monthly') {
+
             groupingKey = yearMonthString;
+
         } else if (reportType === 'yearly') {
+
             groupingKey = yearString;
         }
 
@@ -69,7 +75,7 @@ exports.getFilteredExpenses = async function (userId, reportType, selectedDate) 
         }
     });
 
-    // 5. Convert grouped data into final rows for the frontend
+    // Convert grouped data into final rows for the frontend
     let periodKeysList = Object.keys(groupedReportData).sort().reverse();
     let generatedRows = periodKeysList.map(function (currentPeriodKey) {
         let periodIncomeValue = groupedReportData[currentPeriodKey].income;

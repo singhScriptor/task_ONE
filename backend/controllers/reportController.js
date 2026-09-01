@@ -18,8 +18,11 @@ exports.getReportDataJson = async (req, res, next) => {
 exports.downloadReport = async (req, res, next) => {
     try {
 
+        //for debugging
+        // console.log("DEBUG req.user inside downloadReport:", req.user);
+
         //check user is premium or not
-        if (!req.user || !req.user.ispremiumuser) {
+        if (!req.user || !req.user.isPremium) {
             return res.status(401).json({ message: 'Unauthorized - Premium membership required' });
         }
 
