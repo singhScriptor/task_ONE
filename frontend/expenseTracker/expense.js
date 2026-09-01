@@ -44,7 +44,8 @@ async function addExpenseToDatabase(event) {
         let expensePayload = {
             price: document.getElementById('price').value,
             description: document.getElementById('description').value,
-            category: document.getElementById('category').value
+            category: document.getElementById('category').value,
+            note: document.getElementById('note').value
         };
 
         let response = await axios.post(expenseApiUrl, expensePayload, { withCredentials: true });
