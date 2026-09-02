@@ -82,8 +82,8 @@ app.use(errorhandling);
 
 database.authenticate()
     .then(() => {
-        console.log('Database connected successfully.');
-        app.listen(port, () => {
+       // console.log('Database connected successfully.');
+        app.listen(port,'0.0.0.0', () => {
             console.log('Server is listening ...');
         });
     })
