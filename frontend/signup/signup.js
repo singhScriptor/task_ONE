@@ -2,7 +2,9 @@ const form = document.getElementById('form')
 
 form.addEventListener('submit', signup)
 
-const baseURL = "http://localhost:3000/users/signup"
+// const baseURL = "http://localhost:3000/users/signup"
+
+const baseURL = "/users/signup";
 
 async function signup(e) {
     e.preventDefault()
