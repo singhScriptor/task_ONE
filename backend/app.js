@@ -80,7 +80,7 @@ app.get('/', (req, res) => {
 // error handling middleware
 app.use(errorhandling);
 
-database.authenticate()
+database.sync()
     .then(() => {
        // console.log('Database connected successfully.');
         app.listen(port,'0.0.0.0', () => {
