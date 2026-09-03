@@ -1,4 +1,6 @@
-const BUDGET_BASE_URL = 'http://localhost:3000/api/budget';
+// const BUDGET_BASE_URL = 'http://localhost:3000/api/budget';
+
+const BUDGET_BASE_URL = '/api/budget';
 
 document.addEventListener('DOMContentLoaded', () => {
     const saveBudgetBtn = document.getElementById('saveBudgetBtn');
