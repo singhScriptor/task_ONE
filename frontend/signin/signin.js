@@ -2,7 +2,9 @@ const form = document.getElementById('form')
 
 form.addEventListener('submit',signIn)
 
-const baseURL= 'http://localhost:3000/users/signin'
+// const baseURL= 'http://localhost:3000/users/signin'
+
+const baseURL = '/users/signin';
 
 async function signIn(e) {
     e.preventDefault()
@@ -11,7 +13,7 @@ async function signIn(e) {
             email:document.getElementById('email').value,
             password:document.getElementById('password').value
         }
-        if(account){
+        if(account.email && account.password){
             await navigateAccount(account)
         }
         form.reset()
