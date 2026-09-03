@@ -3,13 +3,22 @@ document.addEventListener("DOMContentLoaded", verifyAndUpdateMembershipStatus);
 const cashfreeInstance = Cashfree({ mode: "sandbox" });
 const premiumButton = document.getElementById("premiumBtn");
 
-const PAYMENT_API_URL = "http://localhost:3000/api/premium/payment";
-const VERIFY_API_URL = "http://localhost:3000/api/premium/verify";
-const STATUS_API_URL = "http://localhost:3000/api/premium/status";
-const LEADERBOARD_API_URL = "http://localhost:3000/api/premium/showLeaderboard";
-const REPORT_DATA_API_URL = "http://localhost:3000/api/reports/data";
-const REPORT_DOWNLOAD_API_URL = "http://localhost:3000/api/reports/download";
-const BUDGET_API_URL = "http://localhost:3000/api/budget";
+// const PAYMENT_API_URL = "http://localhost:3000/api/premium/payment";
+// const VERIFY_API_URL = "http://localhost:3000/api/premium/verify";
+// const STATUS_API_URL = "http://localhost:3000/api/premium/status";
+// const LEADERBOARD_API_URL = "http://localhost:3000/api/premium/showLeaderboard";
+// const REPORT_DATA_API_URL = "http://localhost:3000/api/reports/data";
+// const REPORT_DOWNLOAD_API_URL = "http://localhost:3000/api/reports/download";
+// const BUDGET_API_URL = "http://localhost:3000/api/budget";
+
+//for production aws
+const PAYMENT_API_URL = "/api/premium/payment";
+const VERIFY_API_URL = "/api/premium/verify";
+const STATUS_API_URL = "/api/premium/status";
+const LEADERBOARD_API_URL = "/api/premium/showLeaderboard";
+const REPORT_DATA_API_URL = "/api/reports/data";
+const REPORT_DOWNLOAD_API_URL = "/api/reports/download";
+const BUDGET_API_URL = "/api/budget";
 
 if (premiumButton) {
     premiumButton.addEventListener("click", async function () {

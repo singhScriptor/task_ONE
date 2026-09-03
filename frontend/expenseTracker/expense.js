@@ -1,4 +1,5 @@
-const baseUrl = 'http://localhost:3000/api';
+//const baseUrl = 'http://localhost:3000/api';
+const baseUrl = '/api';
 const expenseApiUrl = `${baseUrl}/expenses`;
 const budgetApiUrl = `${baseUrl}/budget`;
 const summaryApiUrl = `${baseUrl}/expenses/ai`;
