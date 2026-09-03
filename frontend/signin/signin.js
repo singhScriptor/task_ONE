@@ -32,6 +32,6 @@ async function navigateAccount(account) {
         window.location.href = "../expenseTracker/expense.html"
     }
     catch(err){
-        alert('login failed create account first')
+        alert(err.response?.data?.message || 'login failed create account first')
     }
 }
