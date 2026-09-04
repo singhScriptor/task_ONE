@@ -1,3 +1,7 @@
+// const reset_URL = 'http://localhost:3000'
+
+const reset_URL = ""
+
 document.addEventListener("DOMContentLoaded", async () => {
     const form = document.getElementById("reset-form");
 
@@ -12,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Verify link status on page load
     try {
-        await axios.get(`http://localhost:3000/password/resetpassword/${requestId}`);
+        await axios.get(`${reset_URL}/password/resetpassword/${requestId}`);
     } catch (err) {
         alert(err.response?.data?.message || "Link is invalid or expired.");
         form.style.display = "none";
@@ -32,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            const res = await axios.post(`http://localhost:3000/password/updatepassword/${requestId}`, {
+            const res = await axios.post(`${reset_URL}/password/updatepassword/${requestId}`, {
                 password: newPassword
             });
 
